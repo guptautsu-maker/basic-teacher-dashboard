@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="hi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>स्कूल शीट्स — Basic Teacher Dashboard</title>
+<meta name="description" content="MDM, हाज़िरी और रिज़ल्ट शीट्स — एडिट, एक्सपोर्ट और प्रिंट एक जगह।">
+<meta name="theme-color" content="#0D5B49" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0E27" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z' fill='%230D5B49'/%3E%3Cpath d='M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z' fill='%2300B39B'/%3E%3Ccircle cx='32' cy='4' r='4' fill='%239B5DE5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Mukta:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<script>(function(){try{var s=localStorage.getItem('btd-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));}catch(e){}})();</script>
+<style>
+:root{--brand:#0D5B49;--brand-soft:#DCEEE6;--neon:#00F5D4;--bg:#F1F5F2;--surface:#FFFFFF;--surface2:#E6EDE8;--ink:#13231C;--ink2:#52645B;--line:#D3DDD6;--glass:rgba(255,255,255,.7);--glass-border:rgba(0,245,212,.18);--grad:linear-gradient(135deg,#0D5B49,#00F5D4);--danger:#B3261E;--font-d:'Space Grotesk','Tiro Devanagari Hindi',Arial,sans-serif;--font-b:'Inter','Mukta',Arial,sans-serif}
+[data-theme="dark"]{--bg:#0A0E27;--surface:#16231D;--surface2:#1E2E26;--ink:#E7F0EA;--ink2:#9DB0A5;--line:#2B3C34;--glass:rgba(22,35,29,.6);--brand-soft:#173A2F;--danger:#F2867E}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink);line-height:1.6}
+h1,h2,h3{font-family:var(--font-d);line-height:1.25}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border:none;border-radius:12px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .3s}
+.btn-neon{background:var(--grad);color:#fff;box-shadow:0 0 18px rgba(0,245,212,.3)}
+.btn-neon:hover{box-shadow:0 0 28px rgba(0,245,212,.5);transform:translateY(-2px)}
+.btn-ghost{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--neon)}
+.glass-card{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.06);padding:20px}
+/* Header */
+.site-header{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border)}
+.header-inner{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.header-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.header-logo-text{font-family:var(--font-d);font-weight:700;font-size:1.02rem;color:var(--ink);display:flex;flex-direction:column;line-height:1.1}
+.header-logo-sub{font-size:.58rem;font-weight:600;letter-spacing:3px;color:var(--ink2)}
+.header-nav{display:flex;gap:4px}
+.nav-link{padding:8px 14px;border-radius:10px;text-decoration:none;color:var(--ink2);font-size:.95rem;font-weight:500}
+.nav-link:hover{color:var(--ink);background:var(--surface2)}
+.nav-link.active{color:var(--brand);background:var(--brand-soft);font-weight:600}
+[data-theme="dark"] .nav-link.active{color:#3FBF9B}
+.header-actions{display:flex;align-items:center;gap:10px}
+.theme-toggle,.hamburger{width:38px;height:38px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);font-size:1.05rem;cursor:pointer;color:var(--ink)}
+.hamburger{display:none;font-size:1.2rem}
+@media(max-width:860px){.header-nav{display:none}.hamburger{display:block}}
+.mobile-drawer{position:fixed;inset:0;z-index:200;pointer-events:none}
+.drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s}
+.drawer-panel{position:absolute;top:0;right:0;bottom:0;width:min(320px,85vw);background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:6px;transform:translateX(100%);transition:transform .35s ease;overflow-y:auto}
+.mobile-drawer.open{pointer-events:auto}.mobile-drawer.open .drawer-overlay{opacity:1}.mobile-drawer.open .drawer-panel{transform:translateX(0)}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.drawer-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;font-size:1.1rem;cursor:pointer;color:var(--ink)}
+.drawer-link{padding:12px 14px;border-radius:12px;text-decoration:none;color:var(--ink);font-weight:500}
+.drawer-link:hover{background:var(--surface2)}
+.drawer-link.active{background:var(--brand-soft);color:var(--brand);font-weight:600}
+[data-theme="dark"] .drawer-link.active{color:#3FBF9B}
+/* Layout */
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+.page-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.page-head h1{font-size:clamp(1.4rem,4vw,1.9rem)}
+.hint{color:var(--ink2);font-size:.85rem}
+/* Summary cards */
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.sum-card{display:flex;align-items:center;gap:14px;padding:16px 18px}
+.sum-icon{width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;border-radius:12px;background:var(--surface2)}
+.sum-num{font-family:var(--font-d);font-size:1.5rem;font-weight:700;color:var(--brand)}
+[data-theme="dark"] .sum-num{color:#3FBF9B}
+.sum-label{color:var(--ink2);font-size:.8rem;font-weight:600}
+@media(max-width:700px){.summary{grid-template-columns:1fr}}
+/* Tabs */
+.tabs-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{padding:9px 18px;border-radius:99px;border:1px solid var(--glass-border);background:var(--glass);color:var(--ink2);font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--neon)}
+.chip.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 0 16px rgba(0,245,212,.3)}
+/* Toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+/* Table */
+.table-card{padding:0;overflow:hidden}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
+th{text-align:left;padding:12px 14px;background:var(--surface2);color:var(--ink2);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td[contenteditable="true"]{outline:none;min-width:70px;border-radius:6px;transition:background .2s}
+td[contenteditable="true"]:hover{background:var(--surface2)}
+td[contenteditable="true"]:focus{background:var(--brand-soft);box-shadow:inset 0 0 0 1px var(--neon)}
+td.auto{font-weight:700;color:var(--brand)}
+[data-theme="dark"] td.auto{color:#3FBF9B}
+.row-del{border:none;background:transparent;color:var(--ink2);cursor:pointer;font-size:1rem;padding:4px}
+.row-del:hover{color:var(--danger)}
+.empty-row td{text-align:center;color:var(--ink2);padding:28px}
+.hidden{display:none}
+.slim-footer{border-top:1px solid var(--line);background:var(--surface);padding:20px;text-align:center;color:var(--ink2);font-size:.85rem}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--bg);padding:12px 24px;border-radius:99px;font-size:.9rem;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.3);transition:transform .35s;z-index:300;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+@media print{
+  .site-header,.mobile-drawer,.toolbar,.summary,.tabs-row,.slim-footer,.toast,.row-del,.page-head .btn{display:none!important}
+  body{background:#fff}.glass-card,.table-card{box-shadow:none;border:1px solid #bbb;background:#fff}
+  td[contenteditable="true"]:focus{background:none;box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="header-logo">
+      <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D5B49"/><stop offset="1" stop-color="#00F5D4"/></linearGradient></defs><path d="M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z" fill="url(#lg1)" opacity=".9"/><path d="M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z" fill="#0D5B49" opacity=".75"/><line x1="32" y1="14" x2="32" y2="49" stroke="#00F5D4" stroke-width="2"/><circle cx="32" cy="28" r="2.5" fill="#00F5D4"/></svg>
+      <span class="header-logo-text">BASIC TEACHER<span class="header-logo-sub">DASHBOARD</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="sheets.html" class="nav-link active">Sheets</a>
+      <a href="login.html" class="nav-link">Login</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <nav class="drawer-panel">
+    <div class="drawer-head"><strong>मेनू</strong><button class="drawer-close" id="drawerClose">✕</button></div>
+    <a href="dashboard.html" class="drawer-link">🏠 Dashboard</a>
+    <a href="sheets.html" class="drawer-link active">📊 Sheets</a>
+    <a href="login.html" class="drawer-link">🔐 Login</a>
+  </nav>
+</div>
+
+<main class="wrap">
+  <div class="page-head">
+    <div><h1>📊 स्कूल शीट्स</h1><div class="hint">किसी भी खाने पर क्लिक करके सीधे लिखें — सब अपने आप सेव होता है 💾</div></div>
+    <button class="btn btn-ghost" onclick="window.print()">🖨️ प्रिंट करें</button>
+  </div>
+
+  <div class="summary">
+    <div class="glass-card sum-card"><div class="sum-icon">🍱</div><div><div class="sum-num" id="sumMdm">0</div><div class="sum-label">MDM एंट्री</div></div></div>
+    <div class="glass-card sum-card"><div class="sum-icon">🧑‍🤝‍🧑</div><div><div class="sum-num" id="sumAtt">0</div><div class="sum-label">हाज़िरी एंट्री</div></div></div>
+    <div class="glass-card sum-card"><div class="sum-icon">🏆</div><div><div class="sum-num" id="sumRes">0</div><div class="sum-label">रिज़ल्ट एंट्री</div></div></div>
+  </div>
+
+  <div class="tabs-row" id="tabs">
+    <button class="chip active" data-s="mdm">🍱 MDM शीट</button>
+    <button class="chip" data-s="att">🧑🤝‍ हाज़िरी / अनुपस्थिति</button>
+    <button class="chip" data-s="res">🏆 रिज़ल्ट शीट</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-neon" id="addRow">＋ नई पंक्ति जोड़ें</button>
+    <button class="btn btn-ghost" id="sampleBtn">✨ नमूना डेटा भरें</button>
+    <button class="btn btn-ghost" id="exportBtn">⬇️ CSV एक्सपोर्ट</button>
+  </div>
+
+  <div class="glass-card table-card">
+    <div class="table-wrap"><div id="tableHost"></div></div>
+  </div>
+</main>
+
+<footer class="slim-footer">© 2026 Basic Teacher Dashboard · Made with 💚 for Teachers</footer>
+<div class="toast" id="toast">…</div>
+
+<script>
+/* ---- Sheet configs ---- */
+var today=new Date().toISOString().slice(0,10);
+var SHEETS={
+ mdm:{key:'btd-mdm',file:'MDM-Sheet',cols:[
+   {f:'date',n:'दिन',w:'130px'},{f:'cls',n:'कक्षा'},{f:'enrolled',n:'पंजीकृत'},{f:'present',n:'उपस्थित'},{f:'served',n:'भोजन कराया'},{f:'notes',n:'नोट'}],
+  sample:[{date:today,cls:'कक्षा 3',enrolled:'28',present:'26',served:'26',notes:'सब ठीक'},{date:today,cls:'कक्षा 4',enrolled:'31',present:'29',served:'29',notes:''}]},
+ att:{key:'btd-att',file:'Attendance-Sheet',cols:[
+   {f:'date',n:'दिन',w:'130px'},{f:'cls',n:'कक्षा'},{f:'name',n:'नाम'},{f:'roll',n:'रोल'},{f:'status',n:'स्थिति'},{f:'reason',n:'कारण'}],
+  sample:[{date:today,cls:'कक्षा 3',name:'राहुल वर्मा',roll:'12',status:'अनुपस्थित',reason:'बुखार'},{date:today,cls:'कक्षा 5',name:'मीना कुमारी',roll:'07',status:'अवकाश',reason:'गाँव में कार्यक्रम'}]},
+ res:{key:'btd-res',file:'Result-Sheet',cols:[
+   {f:'exam',n:'परीक्षा'},{f:'cls',n:'कक्षा'},{f:'name',n:'नाम'},{f:'sub',n:'विषय'},{f:'max',n:'पूर्ण अंक'},{f:'got',n:'प्राप्त अंक'},{f:'grade',n:'ग्रेड',auto:1},{f:'pass',n:'परिणाम',auto:1}],
+  sample:[{exam:'अर्धवार्षिक',cls:'कक्षा 5',name:'अंकिता सिंह',sub:'गणित',max:'100',got:'82',grade:'',pass:''},{exam:'अर्धवार्षिक',cls:'कक्षा 5',name:'विकास यादव',sub:'गणित',max:'100',got:'28',grade:'',pass:''}]}
+};
+var cur='mdm';
+
+/* ---- Storage ---- */
+function getRows(s){try{return JSON.parse(localStorage.getItem(SHEETS[s].key)||'[]')}catch(e){return[]}}
+function setRows(s,a){try{localStorage.setItem(SHEETS[s].key,JSON.stringify(a))}catch(e){}}
+
+/* ---- Grade auto-calc ---- */
+function gradeOf(max,got){var m=parseFloat(max),g=parseFloat(got);if(isNaN(m)||isNaN(g)||m<=0||g<0)return['',''];var p=g/m*100;var gr=p>=90?'A+':p>=75?'A':p>=60?'B':p>=45?'C':p>=33?'D':'E';return[gr,p>=33?'उत्तीर्ण ✅':'अनुत्तीर्ण ❌'];}
+
+/* ---- Render ---- */
+var host=document.getElementById('tableHost');
+function render(){
+ var S=SHEETS[cur],rows=getRows(cur);
+ var h='<table><thead><tr>';
+ for(var c=0;c<S.cols.length;c++){h+='<th'+(S.cols[c].w?' style="min-width:'+S.cols[c].w+'"':'')+'>'+S.cols[c].n+'</th>';}
+ h+='<th style="width:44px"></th></tr></thead><tbody>';
+ if(!rows.length){h+='<tr class="empty-row"><td colspan="'+(S.cols.length+1)+'">📭 अभी कोई एंट्री नहीं। "नई पंक्ति जोड़ें" दबाएँ!</td></tr>';}
+ for(var i=0;i<rows.length;i++){
+  h+='<tr>';
+  for(var c=0;c<S.cols.length;c++){var col=S.cols[c];
+   if(col.auto){var g=gradeOf(rows[i].max,rows[i].got);var val=col.f==='grade'?g[0]:g[1];h+='<td class="auto" data-i="'+i+'" data-f="'+col.f+'">'+val+'</td>';}
+   else{h+='<td contenteditable="true" data-i="'+i+'" data-f="'+col.f+'">'+(rows[i][col.f]||'')+'</td>';}}
+  h+='<td><button class="row-del" data-del="'+i+'" title="पंक्ति हटाएँ">✕</button></td></tr>';}
+ h+='</tbody></table>';host.innerHTML=h;
+ document.getElementById('sumMdm').textContent=getRows('mdm').length;
+ document.getElementById('sumAtt').textContent=getRows('att').length;
+ document.getElementById('sumRes').textContent=getRows('res').length;
+}
+render();
+
+/* ---- Tabs ---- */
+document.getElementById('tabs').onclick=function(e){var b=e.target.closest('.chip');if(!b)return;cur=b.getAttribute('data-s');var all=document.querySelectorAll('.chip');for(var i=0;i<all.length;i++)all[i].classList.remove('active');b.classList.add('active');render();};
+
+/* ---- Cell edit (auto-save) ---- */
+var saveT;
+host.addEventListener('input',function(e){var td=e.target.closest('td[contenteditable="true"]');if(!td)return;
+ var i=+td.getAttribute('data-i'),f=td.getAttribute('data-f');var rows=getRows(cur);if(!rows[i])return;rows[i][f]=td.textContent;
+ if(cur==='res'&&(f==='max'||f==='got')){var g=gradeOf(rows[i].max,rows[i].got);rows[i].grade=g[0];rows[i].pass=g[1];
+   var gc=host.querySelector('td[data-i="'+i+'"][data-f="grade"]'),pc=host.querySelector('td[data-i="'+i+'"][data-f="pass"]');if(gc)gc.textContent=g[0];if(pc)pc.textContent=g[1];}
+ setRows(cur,rows);clearTimeout(saveT);saveT=setTimeout(function(){toast('💾 सेव हो गया');},600);});
+
+/* ---- Delete row ---- */
+host.onclick=function(e){var d=e.target.closest('.row-del');if(!d)return;var i=+d.getAttribute('data-del');var rows=getRows(cur);rows.splice(i,1);setRows(cur,rows);render();toast('🗑️ पंक्ति हटा दी गई');};
+
+/* ---- Add row ---- */
+document.getElementById('addRow').onclick=function(){var rows=getRows(cur);var r={date:today};rows.push(r);setRows(cur,rows);render();toast('➕ नई पंक्ति जुड़ गई — खानों में लिखें');};
+
+/* ---- Sample data ---- */
+document.getElementById('sampleBtn').onclick=function(){var rows=getRows(cur);var s=SHEETS[cur].sample;for(var i=0;i<s.length;i++)rows.push(JSON.parse(JSON.stringify(s[i])));setRows(cur,rows);render();toast('✨ नमूना डेटा भर गया');};
+
+/* ---- CSV export ---- */
+document.getElementById('exportBtn').onclick=function(){var S=SHEETS[cur],rows=getRows(cur);if(!rows.length){toast('📭 खाली शीट एक्सपोर्ट नहीं होगी');return;}
+ var out=[];var head=[];for(var c=0;c<S.cols.length;c++)head.push(S.cols[c].n);out.push(head);
+ for(var i=0;i<rows.length;i++){var line=[];for(var c=0;c<S.cols.length;c++){var col=S.cols[c];var v=rows[i][col.f]||'';if(col.auto){var g=gradeOf(rows[i].max,rows[i].got);v=col.f==='grade'?g[0]:g[1];}line.push(v);}out.push(line);}
+ var csv='\uFEFF';for(var r=0;r<out.length;r++){var cells=[];for(var c=0;c<out[r].length;c++){cells.push('"'+String(out[r][c]).replace(/"/g,'""')+'"');}csv+=cells.join(',')+'\r\n';}
+ var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=S.file+'-'+today+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('⬇️ CSV डाउनलोड हो गई!');};
+
+/* ---- Theme + Drawer + Toast ---- */
+var toastEl=document.getElementById('toast'),toastT;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('show')},2200);}
+var tt=document.getElementById('themeToggle');
+function setIcon(){tt.textContent=(document.documentElement.getAttribute('data-theme')==='dark')?'☀️':'🌙';}
+setIcon();
+tt.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('btd-theme',n)}catch(e){}setIcon();};
+var md=document.getElementById('mobileDrawer');
+document.getElementById('hamburgerBtn').onclick=function(){md.classList.add('open')};
+document.getElementById('drawerOverlay').onclick=function(){md.classList.remove('open')};
+document.getElementById('drawerClose').onclick=function(){md.classList.remove('open')};
+</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Basic Teacher Dashboard — Every Portal. Every Update. One Dashboard.</title>
+<meta name="description" content="All-in-one dashboard for basic teachers. Access every govt portal, notices, records, reminders and tools in one place. Fast, secure, free.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Basic Teacher Dashboard">
+<meta property="og:description" content="Every Portal. Every Update. One Dashboard.">
+<meta name="theme-color" content="#0D5B49" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0E27" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z' fill='%230D5B49'/%3E%3Cpath d='M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z' fill='%2300B39B'/%3E%3Ccircle cx='32' cy='4' r='4' fill='%239B5DE5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Mukta:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<script>
+(function(){try{var s=localStorage.getItem('btd-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));}catch(e){}})();
+</script>
+<style>
+/* ============ COLORS & TOKENS ============ */
+:root{
+  --brand:#0D5B49; --brand-soft:#DCEEE6;
+  --neon:#00F5D4; --purple:#9B5DE5; --pink:#F15BB5;
+  --bg:#F1F5F2; --surface:#FFFFFF; --surface2:#E6EDE8;
+  --ink:#13231C; --ink2:#52645B; --line:#D3DDD6;
+  --glass:rgba(255,255,255,.7); --glass-border:rgba(0,245,212,.18);
+  --grad:linear-gradient(135deg,#0D5B49,#00F5D4);
+  --grad2:linear-gradient(135deg,#9B5DE5,#F15BB5);
+  --glow:radial-gradient(ellipse at top,rgba(0,245,212,.12),transparent 70%);
+  --font-d:'Space Grotesk','Tiro Devanagari Hindi',Arial,sans-serif;
+  --font-b:'Inter','Mukta',Arial,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0A0E27; --surface:#16231D; --surface2:#1E2E26;
+  --ink:#E7F0EA; --ink2:#9DB0A5; --line:#2B3C34;
+  --glass:rgba(22,35,29,.6); --brand-soft:#173A2F;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink);line-height:1.6}
+h1,h2,h3{font-family:var(--font-d);line-height:1.2}
+img{max-width:100%}
+
+/* ============ BUTTONS ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:none;border-radius:12px;font-family:var(--font-b);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .3s ease}
+.btn-neon{background:var(--grad);color:#fff;box-shadow:0 0 20px rgba(0,245,212,.3);position:relative;overflow:hidden}
+.btn-neon:hover{box-shadow:0 0 30px rgba(0,245,212,.5);transform:translateY(-2px)}
+.btn-neon::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);transform:translateX(-100%);transition:transform .6s}
+.btn-neon:hover::after{transform:translateX(100%)}
+.btn-ghost{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--neon);box-shadow:0 0 15px rgba(0,245,212,.2)}
+.btn-light{background:#fff;color:#0D5B49}
+.btn-light:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.btn-sm{padding:8px 16px;font-size:13px;border-radius:10px}
+.btn-lg{padding:16px 32px;font-size:17px;border-radius:14px}
+
+/* ============ GLASS CARD ============ */
+.glass-card{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.06);padding:24px;transition:all .3s cubic-bezier(.4,0,.2,1)}
+.glass-card:hover{border-color:rgba(0,245,212,.35);box-shadow:0 8px 32px rgba(0,0,0,.1),0 0 20px rgba(0,245,212,.1);transform:translateY(-3px)}
+.card-title{font-size:1.15rem;font-weight:600;margin-bottom:8px}
+.card-text{color:var(--ink2);font-size:.95rem}
+
+/* ============ BADGES ============ */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge-completed{background:var(--brand-soft);color:var(--brand)}
+[data-theme="dark"] .badge-completed{color:#3FBF9B}
+.badge-pending{background:#FBEAD0;color:#B8680C}
+[data-theme="dark"] .badge-pending{background:#3B2A12;color:#F2A64E}
+.badge-notstarted{background:var(--surface2);color:var(--ink2)}
+
+/* ============ HEADER ============ */
+.site-header{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border)}
+.header-inner{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.header-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.header-logo-text{font-family:var(--font-d);font-weight:700;font-size:1.02rem;color:var(--ink);display:flex;flex-direction:column;line-height:1.1}
+.header-logo-sub{font-family:var(--font-b);font-size:.58rem;font-weight:600;letter-spacing:3px;color:var(--ink2)}
+.header-nav{display:flex;gap:4px}
+.nav-link{padding:8px 14px;border-radius:10px;text-decoration:none;color:var(--ink2);font-size:.95rem;font-weight:500;transition:all .2s}
+.nav-link:hover{color:var(--ink);background:var(--surface2)}
+.nav-link.active{color:var(--brand);background:var(--brand-soft);font-weight:600}
+[data-theme="dark"] .nav-link.active{color:#3FBF9B}
+.header-actions{display:flex;align-items:center;gap:10px}
+.theme-toggle,.hamburger{width:38px;height:38px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);font-size:1.05rem;cursor:pointer;color:var(--ink)}
+.theme-toggle:hover{border-color:var(--neon);box-shadow:0 0 12px rgba(0,245,212,.25)}
+.hamburger{display:none;font-size:1.2rem}
+@media(max-width:860px){.header-nav{display:none}.header-actions .btn{display:none}.hamburger{display:block}}
+
+/* ============ MOBILE DRAWER ============ */
+.mobile-drawer{position:fixed;inset:0;z-index:200;pointer-events:none}
+.drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s}
+.drawer-panel{position:absolute;top:0;right:0;bottom:0;width:min(320px,85vw);background:var(--surface);border-left:1px solid var(--glass-border);padding:20px;display:flex;flex-direction:column;gap:6px;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.mobile-drawer.open{pointer-events:auto}
+.mobile-drawer.open .drawer-overlay{opacity:1}
+.mobile-drawer.open .drawer-panel{transform:translateX(0)}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.drawer-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;font-size:1.1rem;cursor:pointer;color:var(--ink)}
+.drawer-link{padding:12px 14px;border-radius:12px;text-decoration:none;color:var(--ink);font-weight:500}
+.drawer-link:hover{background:var(--surface2)}
+.drawer-link.active{background:var(--brand-soft);color:var(--brand);font-weight:600}
+[data-theme="dark"] .drawer-link.active{color:#3FBF9B}
+.drawer-divider{height:1px;background:var(--line);margin:10px 0}
+.drawer-cta{margin-top:8px}
+
+/* ============ HERO ============ */
+.hero{padding:60px 20px 40px;background:var(--glow),var(--bg);overflow:hidden}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.hero-pill{display:inline-flex;padding:6px 16px;border-radius:99px;background:var(--brand-soft);color:var(--brand);font-size:.8rem;font-weight:700;margin-bottom:20px}
+[data-theme="dark"] .hero-pill{color:#3FBF9B}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:700;line-height:1.15;margin-bottom:16px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{color:var(--ink2);font-size:1.1rem;max-width:520px;margin-bottom:28px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+.hero-trust{display:flex;flex-wrap:wrap;gap:16px;color:var(--ink2);font-size:.85rem;font-weight:600}
+.hero-visual{position:relative;display:flex;justify-content:center}
+.hero-mock{width:100%;max-width:380px;padding:20px}
+.mock-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface2);margin-bottom:10px;font-size:.9rem;font-weight:600}
+.mock-row:last-child{margin-bottom:0}
+.float-icon{position:absolute;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:14px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);box-shadow:0 4px 24px rgba(0,0,0,.06);animation:floaty 4s ease-in-out infinite}
+.fi1{top:-10px;left:6%}.fi2{bottom:8%;left:-4%;animation-delay:1.2s}.fi3{top:12%;right:-2%;animation-delay:2s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr;text-align:center}.hero-sub{margin:0 auto 28px}.hero-cta,.hero-trust{justify-content:center}.hero-visual{margin-top:20px}}
+
+/* ============ STATS ============ */
+.stats{padding:30px 20px}
+.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat-item{text-align:center;padding:22px 10px;border-radius:16px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border)}
+.stat-num{font-family:var(--font-d);font-size:2.2rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat-plus{font-size:1.6rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{display:block;color:var(--ink2);font-size:.85rem;font-weight:600;margin-top:4px}
+@media(max-width:700px){.stats-inner{grid-template-columns:repeat(2,1fr)}}
+
+/* ============ SECTIONS COMMON ============ */
+.section-title{text-align:center;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:10px}
+.section-sub{text-align:center;color:var(--ink2);max-width:560px;margin:0 auto 40px}
+
+/* ============ FEATURES ============ */
+.features{padding:60px 20px 20px;scroll-margin-top:80px}
+.features-inner{max-width:1100px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;border-radius:16px;background:var(--grad);box-shadow:0 6px 18px rgba(13,91,73,.35);margin-bottom:16px}
+.feature-icon.alt{background:var(--grad2);box-shadow:0 6px 18px rgba(155,93,229,.35)}
+@media(max-width:900px){.features-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.features-grid{grid-template-columns:1fr}}
+
+/* ============ HOW IT WORKS ============ */
+.how{padding:60px 20px}
+.how-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.how-step{text-align:center;padding:10px}
+.how-num{width:56px;height:56px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--grad);color:#fff;font-family:var(--font-d);font-size:1.4rem;font-weight:700;box-shadow:0 0 24px rgba(0,245,212,.35)}
+@media(max-width:800px){.how-grid{grid-template-columns:1fr}}
+
+/* ============ TESTIMONIALS ============ */
+.testi{padding:20px 20px 60px}
+.testi-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.stars{color:#F5A623;font-size:.95rem;margin-bottom:12px;letter-spacing:2px}
+.testi-name{font-weight:700;margin-top:14px}
+.testi-role{color:var(--ink2);font-size:.85rem}
+@media(max-width:900px){.testi-grid{grid-template-columns:1fr}}
+
+/* ============ CTA BANNER ============ */
+.cta-banner{padding:20px 20px 60px}
+.cta-inner{max-width:1000px;margin:0 auto;background:var(--grad);border-radius:24px;padding:56px 32px;text-align:center;color:#fff;box-shadow:0 12px 48px rgba(13,91,73,.4);position:relative;overflow:hidden}
+.cta-inner::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.12);top:-120px;right:-80px}
+.cta-inner::after{content:'';position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.1);bottom:-100px;left:-60px}
+.cta-inner h2{font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:12px;position:relative;z-index:1}
+.cta-inner p{opacity:.92;margin-bottom:28px;position:relative;z-index:1}
+.cta-inner .btn{position:relative;z-index:1}
+
+/* ============ FOOTER ============ */
+.site-footer{background:var(--surface);border-top:1px solid var(--line)}
+.footer-inner{max-width:1100px;margin:0 auto;padding:48px 20px 24px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px}
+.footer-brand p{color:var(--ink2);font-size:.9rem;margin:12px 0 16px;max-width:280px}
+.footer-social{display:flex;gap:10px}
+.footer-social a{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);text-decoration:none;font-size:1rem;transition:all .2s}
+.footer-social a:hover{border-color:var(--neon);box-shadow:0 0 12px rgba(0,245,212,.25);transform:translateY(-2px)}
+.footer-col h4{font-family:var(--font-b);font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--ink2);margin-bottom:14px}
+.footer-col a{display:block;color:var(--ink2);text-decoration:none;font-size:.92rem;padding:5px 0;transition:color .2s}
+.footer-col a:hover{color:var(--neon)}
+.footer-bottom{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;color:var(--ink2);font-size:.85rem}
+@media(max-width:860px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.footer-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="header-logo">
+      <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D5B49"/><stop offset="1" stop-color="#00F5D4"/></linearGradient></defs><path d="M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z" fill="url(#lg1)" opacity=".9"/><path d="M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z" fill="#0D5B49" opacity=".75"/><line x1="32" y1="14" x2="32" y2="49" stroke="#00F5D4" stroke-width="2"/><circle cx="20" cy="6" r="3" fill="#00F5D4"/><circle cx="32" cy="2" r="3.5" fill="#9B5DE5"/><circle cx="44" cy="6" r="3" fill="#F15BB5"/><circle cx="32" cy="28" r="2.5" fill="#00F5D4"/></svg>
+      <span class="header-logo-text">BASIC TEACHER<span class="header-logo-sub">DASHBOARD</span></span>
+    </a>
+    <nav class="header-nav" aria-label="Main menu">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#pricing" class="nav-link">Pricing</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+      <a href="login.html" class="btn btn-ghost btn-sm">Login</a>
+      <a href="dashboard.html" class="btn btn-neon btn-sm">Start Free</a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MOBILE DRAWER ============ -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <nav class="drawer-panel" aria-label="Mobile menu">
+    <div class="drawer-head">
+      <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D5B49"/><stop offset="1" stop-color="#00F5D4"/></linearGradient></defs><path d="M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z" fill="url(#lg2)" opacity=".9"/><path d="M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z" fill="#0D5B49" opacity=".75"/><line x1="32" y1="14" x2="32" y2="49" stroke="#00F5D4" stroke-width="2"/><circle cx="32" cy="4" r="4" fill="#9B5DE5"/></svg>
+      <button class="drawer-close" id="drawerClose" aria-label="Close menu">✕</button>
+    </div>
+    <a href="index.html" class="drawer-link active">🏠 Home</a>
+    <a href="#features" class="drawer-link">✨ Features</a>
+    <a href="#pricing" class="drawer-link">💳 Pricing</a>
+    <a href="#faq" class="drawer-link">❓ FAQ</a>
+    <div class="drawer-divider"></div>
+    <a href="#cta" class="drawer-link">🔐 Login</a>
+    <a href="#cta" class="btn btn-neon drawer-cta">Start Free →</a>
+  </nav>
+</div>
+
+<main>
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <span class="hero-pill">🇮🇳 Made for India's Basic Teachers</span>
+      <h1>Every Portal. Every Update. <span class="grad-text">One Dashboard.</span></h1>
+      <p class="hero-sub">सारे सरकारी पोर्टल, नोटिस, रिकॉर्ड और टूल्स — एक ही जगह। बेसिक शिक्षकों के लिए बना सुपरफास्ट और सुरक्षित डैशबोर्ड।</p>
+      <div class="hero-cta">
+        <a href="dashboard.html" class="btn btn-neon btn-lg">Start Free →</a>
+        <a href="#features" class="btn btn-ghost btn-lg">▶ Watch Demo</a>
+      </div>
+      <div class="hero-trust">
+        <span>🔒 256-bit Encrypted</span><span>⚡ Superfast</span><span>🆓 Free Forever</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <span class="float-icon fi1">🔗</span>
+      <span class="float-icon fi2">📢</span>
+      <span class="float-icon fi3">🤖</span>
+      <div class="hero-mock glass-card">
+        <div class="mock-row">🔗 मानव सम्पदा पोर्टल <span class="badge badge-completed" style="margin-left:auto">● Open</span></div>
+        <div class="mock-row">📢 जनगणना 2027 अपडेट <span class="badge badge-pending" style="margin-left:auto">● New</span></div>
+        <div class="mock-row">▶️ नया ट्रेनिंग वीडियो <span class="badge badge-notstarted" style="margin-left:auto">● 12m</span></div>
+        <div class="mock-row">✅ MDM शीट <span class="badge badge-completed" style="margin-left:auto">● Done</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat-item"><span class="stat-num" data-target="34">0</span><span class="stat-plus">+</span><span class="stat-label">Portals & Apps</span></div>
+    <div class="stat-item"><span class="stat-num" data-target="6">0</span><span class="stat-label">Categories</span></div>
+    <div class="stat-item"><span class="stat-num" data-target="100">0</span><span class="stat-plus">%</span><span class="stat-label">Free Forever</span></div>
+    <div class="stat-item"><span class="stat-num" data-target="2">0</span><span class="stat-label">Languages</span></div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="features" id="features">
+  <div class="features-inner">
+    <h2 class="section-title">सब कुछ एक जगह — <span class="grad-text">Everything in One Place</span></h2>
+    <p class="section-sub">शिक्षकों के रोज़मर्रा के काम के लिए बनाए गए 6 पावरफुल सेक्शन।</p>
+    <div class="features-grid">
+      <div class="glass-card"><div class="feature-icon">🔗</div><div class="card-title">Portal Directory</div><p class="card-text">सारे सरकारी पोर्टल और ऐप — श्रेणी अनुसार, एक क्लिक पर। खोजो और तुरंत खोलो।</p></div>
+      <div class="glass-card"><div class="feature-icon alt">📢</div><div class="card-title">Live Notice Board</div><p class="card-text">जनगणना, ट्रेनिंग और सरकारी अपडेट — सबसे पहले, पिन किए हुए नोटिस के साथ।</p></div>
+      <div class="glass-card"><div class="feature-icon">💬</div><div class="card-title">WhatsApp + YouTube Hub</div><p class="card-text">ग्रुप जॉइन लिंक और चैनल अपडेट — सीधे डैशबोर्ड पर, एक क्लिक दूर।</p></div>
+      <div class="glass-card"><div class="feature-icon alt">✅</div><div class="card-title">Tasks & Reminders</div><p class="card-text">टू-डू लिस्ट, नोट्स और रिमाइंडर — हर सेक्शन में, कभी कुछ न भूले।</p></div>
+      <div class="glass-card"><div class="feature-icon">📊</div><div class="card-title">School Sheets</div><p class="card-text">MDM, हाज़िरी, रिज़ल्ट, ग्रांट — सब शीट्स एक जगह, एक्सपोर्ट बटन के साथ।</p></div>
+      <div class="glass-card"><div class="feature-icon alt">🤖</div><div class="card-title">AI Assistant</div><p class="card-text">नोटिस सारांश, प्रश्न पत्र ड्राफ्ट, अनुवाद — चुटकी में, हिंदी में।</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="how">
+  <h2 class="section-title">कैसे काम करता है? — <span class="grad-text">3 आसान स्टेप</span></h2>
+  <p class="section-sub">न कोई लंबा फॉर्म, न कोई झंझट। बस 3 क्लिक और आप अंदर।</p>
+  <div class="how-grid">
+    <div class="how-step"><div class="how-num">1</div><div class="card-title">Free साइन अप करें</div><p class="card-text">Google अकाउंट से 10 सेकंड में लॉगिन। कोई क्रेडिट कार्ड नहीं।</p></div>
+    <div class="how-step"><div class="how-num">2</div><div class="card-title">अपने पोर्टल खोलें</div><p class="card-text">34+ सरकारी पोर्टल और ऐप — एक क्लिक पर, श्रेणी अनुसार सजे हुए।</p></div>
+    <div class="how-step"><div class="how-num">3</div><div class="card-title">काम ट्रैक करें</div><p class="card-text">नोटिस, टास्क, शीट्स और AI सहायक — सब कुछ एक डैशबोर्ड में।</p></div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="testi">
+  <h2 class="section-title">शिक्षक क्या कहते हैं — <span class="grad-text">Real Voices</span></h2>
+  <p class="section-sub">हज़ारों शिक्षक पहले से हमें भरोसा कर रहे हैं।</p>
+  <div class="testi-grid">
+    <div class="glass-card"><div class="stars">★★★★★</div><p class="card-text">"पहले 10 पोर्टल के लिंक याद रखने पड़ते थे। अब एक डैशबोर्ड ने सब आसान कर दिया। जनगणना का काम भी इसी से हो रहा है!"</p><div class="testi-name">रमेश शर्मा</div><div class="testi-role">Primary Teacher, Uttar Pradesh</div></div>
+    <div class="glass-card"><div class="stars">★★★★★</div><p class="card-text">"MDM और हाज़िरी की शीट एक जगह मिल गई। एक्सपोर्ट बटन दबाओ, प्रिंट निकालो — मिनटों का काम सेकंडों में।"</p><div class="testi-name">सुनीता देवी</div><div class="testi-role">Head Teacher, Bihar</div></div>
+    <div class="glass-card"><div class="stars">★★★★★</div><p class="card-text">"हिंदी में पूरा डैशबोर्ड — यही सबसे बड़ी बात है। AI नोटिस सारांश तो कमाल का फीचर है!"</p><div class="testi-name">अनिल कुमार</div><div class="testi-role">Field Trainer, Madhya Pradesh</div></div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="cta-banner" id="cta">
+  <div class="cta-inner">
+    <h2>आज ही शुरू करें — बिल्कुल मुफ़्त</h2>
+    <p>कोई क्रेडिट कार्ड नहीं। कोई झंझट नहीं। बस Google से साइन इन करें और अपना डैशबोर्ड पाएँ।</p>
+    <a href="#" class="btn btn-light btn-lg">Start Free →</a>
+  </div>
+</section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand">
+        <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><defs><linearGradient id="lg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D5B49"/><stop offset="1" stop-color="#00F5D4"/></linearGradient></defs><path d="M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z" fill="url(#lg3)" opacity=".9"/><path d="M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z" fill="#0D5B49" opacity=".75"/><line x1="32" y1="14" x2="32" y2="49" stroke="#00F5D4" stroke-width="2"/><circle cx="32" cy="4" r="4" fill="#9B5DE5"/></svg>
+        <p>Every Portal. Every Update. One Dashboard.<br>भारत के बेसिक शिक्षकों के लिए बनाया गया।</p>
+        <div class="footer-social">
+          <a href="#" aria-label="WhatsApp">💬</a><a href="#" aria-label="YouTube">▶️</a><a href="#" aria-label="Twitter">🐦</a><a href="#" aria-label="Telegram">✈️</a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Company</h4><a href="#">About</a><a href="#">Blog</a><a href="#">Contact</a><a href="#">Changelog</a></div>
+      <div class="footer-col"><h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#">Help Center</a><a href="#faq">FAQ</a></div>
+      <div class="footer-col"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Refund Policy</a><a href="#">Security</a></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Basic Teacher Dashboard. All rights reserved.</span>
+      <span>Made with 💚 for Teachers</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ---- Mobile Drawer ---- */
+var hb=document.getElementById('hamburgerBtn'),md=document.getElementById('mobileDrawer'),ov=document.getElementById('drawerOverlay'),dc=document.getElementById('drawerClose');
+function openD(){md.classList.add('open')}function closeD(){md.classList.remove('open')}
+if(hb)hb.onclick=openD;if(ov)ov.onclick=closeD;if(dc)dc.onclick=closeD;
+
+/* ---- Theme Toggle ---- */
+var tt=document.getElementById('themeToggle');
+function setIcon(){var t=document.documentElement.getAttribute('data-theme');if(tt)tt.textContent=(t==='dark')?'☀️':'🌙';}
+setIcon();
+if(tt)tt.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('btd-theme',n)}catch(e){}setIcon();};
+
+/* ---- Stats Counter ---- */
+(function(){var cs=document.querySelectorAll('.stat-num');if(!cs.length)return;
+function anim(el){var t=parseInt(el.getAttribute('data-target'),10)||0,d=1200,s=null;
+function st(ts){if(!s)s=ts;var p=Math.min((ts-s)/d,1);el.textContent=Math.floor(p*t);if(p<1)requestAnimationFrame(st);}requestAnimationFrame(st);}
+if('IntersectionObserver'in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){anim(e.target);io.unobserve(e.target);}});},{threshold:.5});cs.forEach(function(c){io.observe(c)});}else{cs.forEach(anim);}})();
+</script>
+</body>
+</html>

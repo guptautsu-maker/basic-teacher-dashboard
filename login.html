@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="hi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>लॉगिन / साइन अप — Basic Teacher Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z' fill='%230D5B49'/%3E%3Cpath d='M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z' fill='%2300B39B'/%3E%3Ccircle cx='32' cy='4' r='4' fill='%239B5DE5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Mukta:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<script>(function(){try{var s=localStorage.getItem('btd-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));}catch(e){}})();</script>
+<script src="supabase.js"></script>
+<style>
+:root{--brand:#0D5B49;--brand-soft:#DCEEE6;--neon:#00F5D4;--bg:#F1F5F2;--surface:#FFFFFF;--surface2:#E6EDE8;--ink:#13231C;--ink2:#52645B;--line:#D3DDD6;--glass:rgba(255,255,255,.7);--glass-border:rgba(0,245,212,.18);--grad:linear-gradient(135deg,#0D5B49,#00F5D4);--danger:#B3261E;--font-d:'Space Grotesk','Tiro Devanagari Hindi',Arial,sans-serif;--font-b:'Inter','Mukta',Arial,sans-serif}
+[data-theme="dark"]{--bg:#0A0E27;--surface:#16231D;--surface2:#1E2E26;--ink:#E7F0EA;--ink2:#9DB0A5;--line:#2B3C34;--glass:rgba(22,35,29,.6);--brand-soft:#173A2F;--danger:#F2867E}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink);line-height:1.6}
+h1,h2,h3{font-family:var(--font-d);line-height:1.25}
+.auth-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.brand-side{background:var(--grad);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.brand-side::before{content:'';position:absolute;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,.1);top:-120px;right:-100px}
+.brand-side::after{content:'';position:absolute;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.08);bottom:-90px;left:-70px}
+.brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:36px;position:relative;z-index:1}
+.brand-logo-text{font-family:var(--font-d);font-weight:700;font-size:1.15rem;display:flex;flex-direction:column;line-height:1.15}
+.brand-logo-sub{font-size:.62rem;font-weight:600;letter-spacing:3px;opacity:.85}
+.brand-side h1{font-size:clamp(1.7rem,3.5vw,2.6rem);margin-bottom:14px;position:relative;z-index:1}
+.brand-side p{opacity:.92;max-width:400px;margin-bottom:28px;position:relative;z-index:1}
+.brand-points{list-style:none;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+.brand-points li{display:flex;gap:10px;align-items:center;font-weight:500;font-size:.95rem}
+.brand-points li span{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.16)}
+.cloud-badge{margin-top:36px;padding:14px 20px;border-radius:14px;background:rgba(255,255,255,.14);font-size:.9rem;font-weight:600;position:relative;z-index:1}
+.form-side{display:flex;align-items:center;justify-content:center;padding:40px 20px;position:relative}
+.theme-toggle{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass);font-size:1.1rem;cursor:pointer;color:var(--ink)}
+.back-home{position:absolute;top:20px;left:20px;text-decoration:none;color:var(--ink2);font-size:.9rem;font-weight:600}
+.back-home:hover{color:var(--neon)}
+.auth-card{width:100%;max-width:420px;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.08);padding:32px}
+.auth-card h2{font-size:1.5rem;margin-bottom:6px}
+.auth-sub{color:var(--ink2);font-size:.9rem;margin-bottom:22px}
+.auth-tabs{display:flex;background:var(--surface2);border-radius:12px;padding:4px;margin-bottom:16px}
+.auth-tab{flex:1;padding:10px;border:none;border-radius:10px;background:transparent;color:var(--ink2);font-family:var(--font-b);font-size:.92rem;font-weight:600;cursor:pointer;transition:all .25s}
+.auth-tab.active{background:var(--surface);color:var(--brand);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+[data-theme="dark"] .auth-tab.active{color:#3FBF9B}
+.status-box{padding:10px 14px;border-radius:10px;font-size:.83rem;margin-bottom:14px}
+.status-ok{background:var(--brand-soft);color:var(--brand)}
+.status-err{background:#FBEAD0;color:#B8680C}
+.status-wait{background:var(--surface2);color:var(--ink2)}
+[data-theme="dark"] .status-ok{background:#173A2F;color:#3FBF9B}
+[data-theme="dark"] .status-err{background:#3B2A12;color:#F2A64E}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.82rem;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass);color:var(--ink);font-family:var(--font-b);font-size:.95rem;outline:none;transition:all .2s}
+.input:focus{border-color:var(--neon);box-shadow:0 0 14px rgba(0,245,212,.18)}
+.input.err{border-color:var(--danger);animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.err-msg{color:var(--danger);font-size:.78rem;margin-top:4px;display:none}
+.err-msg.show{display:block}
+.pw-wrap{position:relative}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;font-size:1.05rem;color:var(--ink2)}
+.strength{height:6px;border-radius:99px;background:var(--surface2);margin-top:8px;overflow:hidden}
+.strength-fill{height:100%;width:0;border-radius:99px;transition:all .35s}
+.strength-label{font-size:.75rem;color:var(--ink2);margin-top:4px}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 18px;font-size:.85rem}
+.row-between a{color:var(--brand);text-decoration:none;font-weight:600;cursor:pointer}
+[data-theme="dark"] .row-between a{color:#3FBF9B}
+.check-row{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--ink2);margin-bottom:18px}
+.check-row input{margin-top:3px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border:none;border-radius:12px;font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;transition:all .3s}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn-neon{background:var(--grad);color:#fff;box-shadow:0 0 20px rgba(0,245,212,.3)}
+.btn-neon:hover{box-shadow:0 0 30px rgba(0,245,212,.5);transform:translateY(-2px)}
+.btn-google{background:var(--surface);border:1px solid var(--line);color:var(--ink);margin-top:12px}
+.btn-google:hover{border-color:var(--neon)}
+.or-line{display:flex;align-items:center;gap:10px;color:var(--ink2);font-size:.8rem;margin:18px 0 4px}
+.or-line::before,.or-line::after{content:'';flex:1;height:1px;background:var(--line)}
+.auth-foot{text-align:center;color:var(--ink2);font-size:.85rem;margin-top:20px}
+.auth-foot a{color:var(--brand);font-weight:700;text-decoration:none;cursor:pointer}
+[data-theme="dark"] .auth-foot a{color:#3FBF9B}
+.hidden{display:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--bg);padding:12px 24px;border-radius:99px;font-size:.9rem;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.3);transition:transform .35s;z-index:300;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+@media(max-width:900px){.auth-wrap{grid-template-columns:1fr}.brand-side{padding:32px 24px;justify-content:flex-start}.brand-points,.cloud-badge{display:none}.brand-side h1{font-size:1.5rem}.brand-side p{margin-bottom:0}.form-side{padding:32px 20px 48px}}
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="brand-side">
+    <div class="brand-logo">
+      <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z" fill="#fff" opacity=".95"/><path d="M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z" fill="#fff" opacity=".6"/><line x1="32" y1="14" x2="32" y2="49" stroke="#0D5B49" stroke-width="2"/><circle cx="32" cy="4" r="4" fill="#fff"/></svg>
+      <span class="brand-logo-text">BASIC TEACHER<span class="brand-logo-sub">DASHBOARD</span></span>
+    </div>
+    <h1>आपका डेटा अब बादलों में ☁️</h1>
+    <p>किसी भी फोन या कंप्यूटर से लॉगिन कीजिए — आपका पूरा डैशबोर्ड वैसा का वैसा मिलेगा।</p>
+    <ul class="brand-points">
+      <li><span>🔐</span> बैंक-जैसी सुरक्षा (RLS एन्क्रिप्शन)</li>
+      <li><span>🔄</span> हर डिवाइस पर अपने आप सिंक</li>
+      <li><span>🔗</span> 34+ पोर्टल एक क्लिक पर</li>
+      <li><span>🆓</span> हमेशा के लिए मुफ़्त</li>
+    </ul>
+    <div class="cloud-badge">☁️ Supabase द्वारा सुरक्षित · 🇮🇳 Mumbai Region</div>
+  </div>
+
+  <div class="form-side">
+    <a href="index.html" class="back-home">← होम पेज</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+    <div class="auth-card">
+      <h2 id="authTitle">वापसी पर स्वागत है! 👋</h2>
+      <p class="auth-sub" id="authSub">अपने डैशबोर्ड में लॉगिन करें</p>
+      <div id="statusBox" class="status-box status-wait">🔌 कनेक्शन जाँच हो रही है…</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin">लॉगिन</button>
+        <button class="auth-tab" id="tabSignup">नया खाता</button>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field"><label for="liEmail">ईमेल</label>
+          <input class="input" type="email" id="liEmail" placeholder="teacher@example.com" autocomplete="email">
+          <div class="err-msg" id="liEmailErr">कृपया सही ईमेल लिखें</div></div>
+        <div class="field"><label for="liPass">पासवर्ड</label>
+          <div class="pw-wrap"><input class="input" type="password" id="liPass" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="pw-eye" data-eye="liPass">👁️</button></div>
+          <div class="err-msg" id="liPassErr">पासवर्ड कम से कम 6 अक्षर का हो</div></div>
+        <div class="row-between"><span></span><a id="forgotLink">पासवर्ड भूल गए?</a></div>
+        <button class="btn btn-neon" type="submit" id="liBtn">लॉगिन करें →</button>
+        <div class="or-line">या</div>
+        <button class="btn btn-google" type="button" id="googleLogin">🇬 Google से लॉगिन करें</button>
+      </form>
+
+      <form id="signupForm" class="hidden" novalidate>
+        <div class="field"><label for="suName">आपका नाम</label>
+          <input class="input" type="text" id="suName" placeholder="जैसे: रमेश शर्मा" autocomplete="name">
+          <div class="err-msg" id="suNameErr">कृपया नाम लिखें (कम से कम 2 अक्षर)</div></div>
+        <div class="field"><label for="suEmail">ईमेल</label>
+          <input class="input" type="email" id="suEmail" placeholder="teacher@example.com" autocomplete="email">
+          <div class="err-msg" id="suEmailErr">कृपया सही ईमेल लिखें</div></div>
+        <div class="field"><label for="suPass">पासवर्ड</label>
+          <div class="pw-wrap"><input class="input" type="password" id="suPass" placeholder="कम से कम 6 अक्षर" autocomplete="new-password">
+          <button type="button" class="pw-eye" data-eye="suPass">👁️</button></div>
+          <div class="strength"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="strength-label" id="strengthLabel"></div>
+          <div class="err-msg" id="suPassErr">पासवर्ड कम से कम 6 अक्षर का हो</div></div>
+        <div class="field"><label for="suPass2">पासवर्ड दोबारा लिखें</label>
+          <div class="pw-wrap"><input class="input" type="password" id="suPass2" placeholder="••••••••" autocomplete="new-password">
+          <button type="button" class="pw-eye" data-eye="suPass2">👁️</button></div>
+          <div class="err-msg" id="suPass2Err">दोनों पासवर्ड एक जैसे नहीं हैं</div></div>
+        <label class="check-row"><input type="checkbox" id="terms" checked> <span>मैं नियम और शर्तें स्वीकार करता/करती हूँ</span></label>
+        <button class="btn btn-neon" type="submit" id="suBtn">मुफ़्त खाता बनाएँ →</button>
+        <div class="or-line">या</div>
+        <button class="btn btn-google" type="button" id="googleSignup">🇬 Google से साइन अप करें</button>
+      </form>
+
+      <p class="auth-foot" id="authFoot">नया हैं? <a id="footSwitch">मुफ़्त खाता बनाएँ</a></p>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">…</div>
+
+<script>
+/* ============================================================
+   ✅ FINAL KEYS (सही URL + सही anon key)
+   ============================================================ */
+var SUPABASE_URL = 'https://tlutctwlfauwkwgnhgsa.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsdXRjdHdsZmF1d2t3Z25oZ3NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwNDkyOTcsImV4cCI6MjEwODYyNTI5N30.3NDrZdUR0l9cujtochXj6hHF-SHPXdhbrPfcWdAIvy4';
+/* ============================================================ */
+
+SUPABASE_ANON_KEY = SUPABASE_ANON_KEY.replace(/\s+/g, '');
+
+function showStatus(msg, cls) {
+  var box = document.getElementById('statusBox');
+  box.innerHTML = msg;
+  box.className = 'status-box ' + (cls || 'status-wait');
+}
+
+/* लाइब्रेरी लोड हुई? */
+var sb = null, configured = false;
+if (typeof supabase === 'undefined') {
+  showStatus('❌ Supabase लाइब्रेरी लोड नहीं हुई। इंटरनेट/CDN जाँचें।', 'status-err');
+} else {
+  try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); configured = true; }
+  catch (e) { showStatus('❌ क्लाइंट नहीं बना: ' + e.message, 'status-err'); }
+}
+
+/* ---- 🩺 कनेक्शन डॉक्टर (अब apikey के साथ → पक्का 200) ---- */
+if (configured) {
+  fetch(SUPABASE_URL + '/auth/v1/health', { headers: { apikey: SUPABASE_ANON_KEY } })
+    .then(function (r) { return r.json().catch(function(){return {}}).then(function(j){ return { st: r.status, j: j }; }); })
+    .then(function (res) {
+      if (res.st === 200) showStatus('✅ <b>सुपाबेस से कनेक्शन ठीक है!</b> अब लॉगिन / साइनअप कर सकते हैं।', 'status-ok');
+      else showStatus('⚠️ सर्वर जवाब: HTTP ' + res.st + ' — फिर भी साइनअप आज़माएँ।', 'status-ok');
+    })
+    .catch(function (err) {
+      showStatus('❌ <b>नेटवर्क समस्या:</b> ' + err.message + '<br>👉 VS Code + Live Server से खोलें, या हॉटस्पॉट आज़माएँ।', 'status-err');
+    });
+}
+
+var toastEl=document.getElementById('toast'),toastT;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('show')},3500);}
+
+/* Theme */
+var tt=document.getElementById('themeToggle');
+function setIcon(){tt.textContent=(document.documentElement.getAttribute('data-theme')==='dark')?'☀️':'🌙';}
+setIcon();
+tt.onclick=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('btd-theme',n)}catch(e){}setIcon();};
+
+/* Tabs */
+var tabL=document.getElementById('tabLogin'),tabS=document.getElementById('tabSignup'),fL=document.getElementById('loginForm'),fS=document.getElementById('signupForm'),foot=document.getElementById('authFoot'),title=document.getElementById('authTitle'),sub=document.getElementById('authSub');
+function showLogin(){tabL.classList.add('active');tabS.classList.remove('active');fL.classList.remove('hidden');fS.classList.add('hidden');title.textContent='वापसी पर स्वागत है! 👋';sub.textContent='अपने डैशबोर्ड में लॉगिन करें';foot.innerHTML='नया हैं? <a id="footSwitch">मुफ़्त खाता बनाएँ</a>';bindFoot();}
+function showSignup(){tabS.classList.add('active');tabL.classList.remove('active');fS.classList.remove('hidden');fL.classList.add('hidden');title.textContent='शिक्षक परिवार में स्वागत! 🎉';sub.textContent='30 सेकंड में मुफ़्त खाता बनाएँ';foot.innerHTML='पहले से खाता है? <a id="footSwitch">लॉगिन करें</a>';bindFoot();}
+function bindFoot(){var f=document.getElementById('footSwitch');if(f)f.onclick=function(){fS.classList.contains('hidden')?showSignup():showLogin();};}
+tabL.onclick=showLogin;tabS.onclick=showSignup;bindFoot();
+
+/* Eyes */
+var eyes=document.querySelectorAll('.pw-eye');
+for(var i=0;i<eyes.length;i++){eyes[i].onclick=function(){var inp=document.getElementById(this.getAttribute('data-eye'));inp.type=(inp.type==='password')?'text':'password';this.textContent=(inp.type==='password')?'👁️':'🙈';};}
+
+/* Helpers */
+function okEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);}
+function setErr(i,e,bad){var inp=document.getElementById(i),er=document.getElementById(e);if(bad){inp.classList.remove('err');void inp.offsetWidth;inp.classList.add('err');er.classList.add('show');}else{inp.classList.remove('err');er.classList.remove('show');}return !bad;}
+function hiError(msg){
+  if(!msg)return 'कुछ गड़बड़ हो गई।';
+  if(msg.indexOf('Invalid login credentials')>-1)return 'ईमेल या पासवर्ड गलत है।';
+  if(msg.indexOf('Email not confirmed')>-1)return 'ईमेल पुष्टि बाकी है — इनबॉक्स देखें या नीचे नोट पढ़ें।';
+  if(msg.indexOf('already registered')>-1)return 'यह ईमेल पहले से पंजीकृत है — लॉगिन टैब से लॉगिन करें।';
+  if(msg.indexOf('at least')>-1)return 'पासवर्ड कम से कम 6 अक्षर का हो।';
+  if(msg.indexOf('Failed to fetch')>-1)return 'नेटवर्क समस्या — Live Server / हॉटस्पॉट आज़माएँ।';
+  if(msg.indexOf('rate limit')>-1)return 'बहुत कोशिशें हो गईं — 1 मिनट रुककर फिर आज़माएँ।';
+  return msg;}
+function saveLocal(user,name){try{localStorage.setItem('btd-user',JSON.stringify({name:name||((user.user_metadata&&user.user_metadata.name)||user.email.split('@')[0]),email:user.email}))}catch(e){}}
+
+/* Session check */
+if (sb) {
+  sb.auth.getSession().then(function(r){
+    if (r.data && r.data.session) { saveLocal(r.data.session.user); window.location.href='dashboard.html'; }
+  });
+}
+
+/* Strength */
+var suPass=document.getElementById('suPass'),fill=document.getElementById('strengthFill'),lab=document.getElementById('strengthLabel');
+suPass.oninput=function(){var v=suPass.value,s=0;if(v.length>=6)s++;if(v.length>=10)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;
+var w=[0,30,55,80,100][s],c=['#B3261E','#B3261E','#B8680C','#16A34A','#0D5B49'][s],t=['','कमज़ोर 😟','ठीक-ठाक 🙂','मज़बूत 💪','बहुत मज़बूत 🛡️'][s];
+fill.style.width=w+'%';fill.style.background=c;lab.textContent=v?t:'';};
+
+/* LOGIN */
+fL.onsubmit=function(e){e.preventDefault();
+  if(!sb){showStatus('❌ कनेक्शन नहीं है — ऊपर वाला बॉक्स पढ़ें।','status-err');return;}
+  var em=document.getElementById('liEmail').value.trim(),pw=document.getElementById('liPass').value;
+  var a=setErr('liEmail','liEmailErr',!okEmail(em)),b=setErr('liPass','liPassErr',pw.length<6);
+  if(!a||!b)return;
+  var btn=document.getElementById('liBtn');btn.disabled=true;btn.textContent='जाँच हो रही है…';
+  sb.auth.signInWithPassword({email:em,password:pw}).then(function(r){
+    btn.disabled=false;btn.textContent='लॉगिन करें →';
+    if(r.error){showStatus('❌ '+hiError(r.error.message),'status-err');return;}
+    saveLocal(r.data.user);showStatus('✅ लॉगिन सफल! डैशबोर्ड खुल रहा है…','status-ok');
+    setTimeout(function(){window.location.href='dashboard.html';},800);
+  }).catch(function(err){btn.disabled=false;btn.textContent='लॉगिन करें →';showStatus('❌ नेटवर्क: '+err.message,'status-err');});
+};
+
+/* SIGNUP — हर नतीजे पर साफ़ संदेश */
+fS.onsubmit=function(e){e.preventDefault();
+  if(!sb){showStatus('❌ कनेक्शन नहीं है — ऊपर वाला बॉक्स पढ़ें।','status-err');return;}
+  var nm=document.getElementById('suName').value.trim(),em=document.getElementById('suEmail').value.trim(),p1=suPass.value,p2=document.getElementById('suPass2').value;
+  var a=setErr('suName','suNameErr',nm.length<2),b=setErr('suEmail','suEmailErr',!okEmail(em)),c=setErr('suPass','suPassErr',p1.length<6),d=setErr('suPass2','suPass2Err',p1!==p2||!p2);
+  if(!a||!b||!c||!d){showStatus('⚠️ ऊपर लाल निशान वाले खाने ठीक करें।','status-err');return;}
+  var btn=document.getElementById('suBtn');btn.disabled=true;btn.textContent='खाता बन रहा है…';
+  sb.auth.signUp({email:em,password:p1,options:{data:{name:nm}}}).then(function(r){
+    btn.disabled=false;btn.textContent='मुफ़्त खाता बनाएँ →';
+    if(r.error){showStatus('❌ '+hiError(r.error.message),'status-err');return;}
+    var u=r.data.user, ses=r.data.session;
+    if(ses){
+      saveLocal(u,nm);
+      showStatus('🎉 <b>खाता बन गया!</b> डैशबोर्ड खुल रहा है…','status-ok');
+      setTimeout(function(){window.location.href='dashboard.html';},800);
+    } else if(u && u.identities && u.identities.length===0){
+      showStatus('⚠️ यह ईमेल पहले से पंजीकृत है — लॉगिन टैब से लॉगिन करें।','status-err');
+      showLogin(); document.getElementById('liEmail').value=em;
+    } else {
+      showStatus('✅ <b>खाता बन गया!</b> लेकिन Supabase में "ईमेल पुष्टि" चालू है।<br>👉 या तो इनबॉक्स में पुष्टि लिंक देखें, या Supabase → Authentication → Sign In / Up → <b>Confirm email = OFF</b> करके नए ईमेल से खाता बनाएँ।<br>अभी लॉगिन टैब खोल दिया गया है — पुष्टि के बाद लॉगिन करें।','status-ok');
+      showLogin(); document.getElementById('liEmail').value=em;
+    }
+  }).catch(function(err){btn.disabled=false;btn.textContent='मुफ़्त खाता बनाएँ →';showStatus('❌ नेटवर्क: '+err.message,'status-err');});
+};
+
+/* Forgot + Google */
+document.getElementById('forgotLink').onclick=function(){
+  if(!sb){showStatus('❌ पहले कनेक्शन ठीक करें।','status-err');return;}
+  var em=prompt('अपना पंजीकृत ईमेल लिखें:');if(!em)return;
+  sb.auth.resetPasswordForEmail(em,{redirectTo:window.location.href}).then(function(r){
+    showStatus(r.error?'❌ '+hiError(r.error.message):'📧 रीसेट लिंक भेज दिया गया!', r.error?'status-err':'status-ok');});};
+document.getElementById('googleLogin').onclick=function(){showStatus('🔜 Google लॉगिन Cloudflare होस्टिंग स्टेप के बाद चालू होगा।','status-ok');};
+document.getElementById('googleSignup').onclick=function(){showStatus('🔜 Google साइन अप Cloudflare होस्टिंग स्टेप के बाद चालू होगा।','status-ok');};
+</script>
+</body>
+</html>
