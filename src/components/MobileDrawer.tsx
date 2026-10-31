@@ -4,8 +4,8 @@ import { UserProfile } from '../types';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login') => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
   unreadCount?: number;
@@ -20,7 +20,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onLogout,
   unreadCount = 0,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login') => {
+  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login') => {
     setActivePage(page);
     onClose();
   };
@@ -54,6 +54,12 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           onClick={() => handleNavigate('dashboard')}
         >
           ⚡ Teacher Hub (मुख्य डैशबोर्ड)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'classes' ? 'active' : ''}`}
+          onClick={() => handleNavigate('classes')}
+        >
+          📚 My Classes (मेरी कक्षाएं व उपस्थिति)
         </button>
         <button
           className={`drawer-link ${activePage === 'notifications' ? 'active' : ''}`}

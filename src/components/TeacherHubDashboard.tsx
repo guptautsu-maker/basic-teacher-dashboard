@@ -22,7 +22,7 @@ import { GovtOrderDetailModal } from './GovtOrderDetailModal';
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
   currentUser?: { name: string; email: string } | null;
-  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login') => void;
+  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login') => void;
 }
 
 const PRIORITY_WEIGHT: Record<TaskPriority, number> = {
@@ -429,6 +429,19 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             >
               <span className="text-lg">🛡️</span>
               <span>दायित्व व रोस्टर (Duties)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onNavigate) onNavigate('classes');
+                else window.location.hash = '#classes';
+              }}
+              className="flex-1 sm:flex-initial py-3 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 min-h-[48px]"
+              title="कक्षाएं, छात्र सूची व उपस्थिति दर्ज करें"
+            >
+              <span className="text-lg">📚</span>
+              <span>मेरी कक्षाएं (Classes)</span>
             </button>
 
             <button
