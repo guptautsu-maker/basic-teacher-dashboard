@@ -22,7 +22,7 @@ import { GovtOrderDetailModal } from './GovtOrderDetailModal';
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
   currentUser?: { name: string; email: string } | null;
-  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login') => void;
+  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login') => void;
 }
 
 const PRIORITY_WEIGHT: Record<TaskPriority, number> = {
@@ -699,10 +699,20 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
             <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#0D5B49]/10 text-[#0D5B49] dark:text-[#00F5D4] dark:bg-[#00F5D4]/10">
               कुल: {todayTasks.length + todayMeetings.length} कार्य/बैठक
             </span>
+            {onNavigate && (
+              <button
+                type="button"
+                onClick={() => onNavigate('meetings')}
+                className="text-xs font-bold px-3 py-1 rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800 transition-colors flex items-center gap-1"
+              >
+                <span>🤝</span>
+                <span>कैलेंडर व बैठकें →</span>
+              </button>
+            )}
           </div>
         </div>
 
