@@ -1,0 +1,8 @@
+{
+  "name": "Basic Teacher Dashboard",
+  "description": "All-in-one dashboard for basic teachers in India. Access government portals, live notices, school sheets (MDM, attendance, results), WhatsApp & YouTube hubs, and daily tools.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
