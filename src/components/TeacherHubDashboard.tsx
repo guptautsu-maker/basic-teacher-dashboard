@@ -22,7 +22,7 @@ import { GovtOrderDetailModal } from './GovtOrderDetailModal';
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
   currentUser?: { name: string; email: string } | null;
-  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login') => void;
+  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => void;
 }
 
 const PRIORITY_WEIGHT: Record<TaskPriority, number> = {
@@ -408,7 +408,34 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             <button
               type="button"
               onClick={() => {
-                window.location.hash = '#portals';
+                if (onNavigate) onNavigate('trainings');
+                else window.location.hash = '#trainings';
+              }}
+              className="flex-1 sm:flex-initial py-3 px-4 rounded-2xl bg-teal-500/80 hover:bg-teal-400 text-slate-900 font-bold text-sm shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 min-h-[48px]"
+              title="प्रशिक्षण व दीक्षा कोर्स प्रबंधन"
+            >
+              <span className="text-lg">🎓</span>
+              <span>प्रशिक्षण (Trainings)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onNavigate) onNavigate('duties');
+                else window.location.hash = '#duties';
+              }}
+              className="flex-1 sm:flex-initial py-3 px-4 rounded-2xl bg-emerald-500/80 hover:bg-emerald-400 text-slate-900 font-bold text-sm shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 min-h-[48px]"
+              title="साप्ताहिक रोस्टर व विशेष दायित्व"
+            >
+              <span className="text-lg">🛡️</span>
+              <span>दायित्व व रोस्टर (Duties)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onNavigate) onNavigate('portals');
+                else window.location.hash = '#portals';
               }}
               className="flex-1 sm:flex-initial py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 min-h-[48px]"
               title="सभी विभागीय पोर्टल व ऐप्स देखें"

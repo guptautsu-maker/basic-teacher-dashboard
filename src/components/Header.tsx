@@ -2,8 +2,8 @@ import React from 'react';
 import { UserProfile } from '../types';
 
 interface HeaderProps {
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   isDrawerOpen: boolean;
@@ -65,6 +65,20 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActivePage('dashboard')}
           >
             ⚡ Teacher Hub
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activePage === 'trainings' ? 'active' : ''}`}
+            onClick={() => setActivePage('trainings')}
+          >
+            🎓 Trainings
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activePage === 'duties' ? 'active' : ''}`}
+            onClick={() => setActivePage('duties')}
+          >
+            🛡️ Duties
           </button>
           <button
             type="button"

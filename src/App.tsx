@@ -10,6 +10,8 @@ import { Login } from './pages/Login';
 import { PortalsManager } from './components/PortalsManager';
 import { GovtOrdersManager } from './components/GovtOrdersManager';
 import { MeetingsManager } from './components/MeetingsManager';
+import { TrainingsManager } from './components/TrainingsManager';
+import { DutiesManager } from './components/DutiesManager';
 import { getStoredUser, setStoredUser, supabase } from './supabase';
 import { UserProfile } from './types';
 
@@ -41,10 +43,12 @@ export const App: React.FC = () => {
 
   // Page Routing
   const [activePage, setActivePage] = useState<
-    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login'
+    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login'
   >(() => {
     const hash = window.location.hash.toLowerCase();
     if (hash.includes('dashboard')) return 'dashboard';
+    if (hash.includes('train')) return 'trainings';
+    if (hash.includes('dut') || hash.includes('roster')) return 'duties';
     if (hash.includes('portal')) return 'portals';
     if (hash.includes('order') || hash.includes('shashanadesh') || hash.includes('govt')) return 'govt_orders';
     if (hash.includes('meet')) return 'meetings';
@@ -57,6 +61,8 @@ export const App: React.FC = () => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
       if (hash.includes('dashboard')) setActivePage('dashboard');
+      else if (hash.includes('train')) setActivePage('trainings');
+      else if (hash.includes('dut') || hash.includes('roster')) setActivePage('duties');
       else if (hash.includes('portal')) setActivePage('portals');
       else if (hash.includes('order') || hash.includes('shashanadesh') || hash.includes('govt')) setActivePage('govt_orders');
       else if (hash.includes('meet')) setActivePage('meetings');
@@ -70,7 +76,7 @@ export const App: React.FC = () => {
   }, []);
 
   const navigateTo = (
-    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login'
+    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login'
   ) => {
     setActivePage(page);
     window.location.hash =
@@ -80,6 +86,10 @@ export const App: React.FC = () => {
         ? 'govt-orders'
         : page === 'meetings'
         ? 'meetings'
+        : page === 'trainings'
+        ? 'trainings'
+        : page === 'duties'
+        ? 'duties'
         : page;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -179,6 +189,20 @@ export const App: React.FC = () => {
             currentUser={currentUser}
             onToast={showToast}
             onNavigate={navigateTo}
+          />
+        )}
+        {activePage === 'trainings' && (
+          <TrainingsManager
+            onToast={showToast}
+            onNavigate={navigateTo}
+            currentUser={currentUser}
+          />
+        )}
+        {activePage === 'duties' && (
+          <DutiesManager
+            onToast={showToast}
+            onNavigate={navigateTo}
+            currentUser={currentUser}
           />
         )}
         {activePage === 'portals' && (

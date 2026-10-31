@@ -4,8 +4,8 @@ import { UserProfile } from '../types';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
 }
@@ -18,7 +18,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   currentUser,
   onLogout,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'login') => {
+  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => {
     setActivePage(page);
     onClose();
   };
@@ -52,6 +52,18 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           onClick={() => handleNavigate('dashboard')}
         >
           ⚡ Teacher Hub (मुख्य डैशबोर्ड)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'trainings' ? 'active' : ''}`}
+          onClick={() => handleNavigate('trainings')}
+        >
+          🎓 Trainings (प्रशिक्षण व दीक्षा)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'duties' ? 'active' : ''}`}
+          onClick={() => handleNavigate('duties')}
+        >
+          🛡️ Duties (विशेष दायित्व व रोस्टर)
         </button>
         <button
           className={`drawer-link ${activePage === 'portals' ? 'active' : ''}`}
