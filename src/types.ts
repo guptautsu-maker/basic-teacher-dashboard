@@ -2,6 +2,16 @@ export type CategoryKey = 'c1' | 'c2' | 'c3' | 'c4' | 'c5' | 'c6';
 
 export type WorkStatus = 'not_started' | 'in_progress' | 'pending' | 'completed';
 
+export type {
+  TaskStatus,
+  RecurrenceFrequency,
+  TaskPriority,
+  TaskType,
+  StatusLog,
+  Task,
+  StatusMeta,
+} from './utils/taskStatusSystem.js';
+
 export interface CategoryInfo {
   name: string;
   emoji: string;
