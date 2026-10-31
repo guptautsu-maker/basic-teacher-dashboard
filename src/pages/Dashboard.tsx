@@ -24,6 +24,7 @@ import { AddNoticeModal } from '../components/AddNoticeModal';
 import { AddActionCardModal } from '../components/AddActionCardModal';
 import { AddWorkspaceToolModal } from '../components/AddWorkspaceToolModal';
 import { TeacherHubDashboard } from '../components/TeacherHubDashboard';
+import { PortalsManager } from '../components/PortalsManager';
 
 const NOTE_CATEGORIES: Record<
   QuickNote['category'],
@@ -811,6 +812,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
         <TeacherHubDashboard onToast={onToast} currentUser={currentUser} />
       ) : (
         <>
+          {/* Portals and Apps Module */}
+          <div style={{ marginBottom: '32px' }}>
+            <PortalsManager onToast={onToast} onNavigate={onNavigate} />
+          </div>
+
           {/* ------------------------------------------------------------- */}
           {/* 1. Action Cards Section (Editable: Add / Edit / Delete / Status) */}
           {/* ------------------------------------------------------------- */}

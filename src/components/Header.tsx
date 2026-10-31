@@ -2,8 +2,8 @@ import React from 'react';
 import { UserProfile } from '../types';
 
 interface HeaderProps {
-  activePage: 'home' | 'dashboard' | 'sheets' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'sheets' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login') => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   isDrawerOpen: boolean;
@@ -68,24 +68,18 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
           <button
             type="button"
+            className={`nav-link ${activePage === 'portals' ? 'active' : ''}`}
+            onClick={() => setActivePage('portals')}
+          >
+            🌐 Portals & Apps
+          </button>
+          <button
+            type="button"
             className={`nav-link ${activePage === 'sheets' ? 'active' : ''}`}
             onClick={() => setActivePage('sheets')}
           >
             Sheets
           </button>
-          {activePage === 'dashboard' && (
-            <>
-              <a href="#portals" className="nav-link">
-                Portals
-              </a>
-              <a href="#quick-notes" className="nav-link">
-                Quick Notes
-              </a>
-              <a href="#tools" className="nav-link">
-                Tools
-              </a>
-            </>
-          )}
           {activePage === 'home' && (
             <>
               <a href="#features" className="nav-link">

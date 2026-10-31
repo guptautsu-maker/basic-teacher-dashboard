@@ -4,8 +4,8 @@ import { UserProfile } from '../types';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'sheets' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'sheets' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login') => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
 }
@@ -18,7 +18,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   currentUser,
   onLogout,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'sheets' | 'login') => {
+  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login') => {
     setActivePage(page);
     onClose();
   };
@@ -52,6 +52,12 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           onClick={() => handleNavigate('dashboard')}
         >
           ⚡ Teacher Hub (मुख्य डैशबोर्ड)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'portals' ? 'active' : ''}`}
+          onClick={() => handleNavigate('portals')}
+        >
+          🌐 Portals & Apps (सरकारी पोर्टल)
         </button>
         <button
           className={`drawer-link ${activePage === 'sheets' ? 'active' : ''}`}

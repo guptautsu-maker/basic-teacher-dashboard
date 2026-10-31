@@ -12,6 +12,12 @@ export type {
   StatusMeta,
 } from './utils/taskStatusSystem.js';
 
+export type {
+  PortalApp,
+  PortalCategory,
+  PortalCategoryMeta,
+} from './types/portalApp';
+
 export interface CategoryInfo {
   name: string;
   emoji: string;

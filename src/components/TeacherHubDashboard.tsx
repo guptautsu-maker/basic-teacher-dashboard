@@ -382,6 +382,18 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
               <span className="text-lg">🎓</span>
               <span>+ प्रशिक्षण</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                window.location.hash = '#portals';
+              }}
+              className="flex-1 sm:flex-initial py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 min-h-[48px]"
+              title="सभी विभागीय पोर्टल व ऐप्स देखें"
+            >
+              <span className="text-lg">🌐</span>
+              <span>पोर्टल व ऐप्स (Portals)</span>
+            </button>
           </div>
         </div>
       </div>
