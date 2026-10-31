@@ -4,8 +4,8 @@ import { UserProfile } from '../types';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
   unreadCount?: number;
@@ -20,7 +20,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onLogout,
   unreadCount = 0,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login') => {
+  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => {
     setActivePage(page);
     onClose();
   };
@@ -60,6 +60,12 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           onClick={() => handleNavigate('classes')}
         >
           📚 My Classes (मेरी कक्षाएं व उपस्थिति)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'rollover' ? 'active' : ''}`}
+          onClick={() => handleNavigate('rollover')}
+        >
+          🔄 Session Rollover (वार्षिक सत्र परिवर्तन)
         </button>
         <button
           className={`drawer-link ${activePage === 'notifications' ? 'active' : ''}`}

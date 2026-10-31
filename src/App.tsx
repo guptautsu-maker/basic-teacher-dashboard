@@ -14,6 +14,7 @@ import { TrainingsManager } from './components/TrainingsManager';
 import { DutiesManager } from './components/DutiesManager';
 import { NotificationCenter } from './components/NotificationCenter';
 import { MyClassesManager } from './components/MyClassesManager';
+import { AnnualRolloverWizard } from './components/AnnualRolloverWizard';
 import { useReminderService } from './utils/useReminderService';
 import { getStoredUser, setStoredUser, supabase } from './supabase';
 import { UserProfile } from './types';
@@ -61,10 +62,11 @@ export const App: React.FC = () => {
 
   // Page Routing
   const [activePage, setActivePage] = useState<
-    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login'
+    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login'
   >(() => {
     const hash = window.location.hash.toLowerCase();
     if (hash.includes('dashboard')) return 'dashboard';
+    if (hash.includes('rollover') || hash.includes('session')) return 'rollover';
     if (hash.includes('class')) return 'classes';
     if (hash.includes('notif') || hash.includes('alert') || hash.includes('remind')) return 'notifications';
     if (hash.includes('train')) return 'trainings';
@@ -81,6 +83,7 @@ export const App: React.FC = () => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
       if (hash.includes('dashboard')) setActivePage('dashboard');
+      else if (hash.includes('rollover') || hash.includes('session')) setActivePage('rollover');
       else if (hash.includes('class')) setActivePage('classes');
       else if (hash.includes('notif') || hash.includes('alert') || hash.includes('remind')) setActivePage('notifications');
       else if (hash.includes('train')) setActivePage('trainings');
@@ -98,7 +101,7 @@ export const App: React.FC = () => {
   }, []);
 
   const navigateTo = (
-    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login'
+    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login'
   ) => {
     setActivePage(page);
     window.location.hash =
@@ -116,6 +119,8 @@ export const App: React.FC = () => {
         ? 'notifications'
         : page === 'classes'
         ? 'classes'
+        : page === 'rollover'
+        ? 'rollover'
         : page;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -220,6 +225,13 @@ export const App: React.FC = () => {
         )}
         {activePage === 'classes' && (
           <MyClassesManager
+            onToast={showToast}
+            onNavigate={navigateTo}
+            currentUser={currentUser}
+          />
+        )}
+        {activePage === 'rollover' && (
+          <AnnualRolloverWizard
             onToast={showToast}
             onNavigate={navigateTo}
             currentUser={currentUser}

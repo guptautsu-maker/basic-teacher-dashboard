@@ -361,7 +361,7 @@ export const MyClassesManager: React.FC<MyClassesManagerProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 self-start sm:self-center">
+            <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-center">
               {onNavigate && (
                 <button
                   onClick={() => onNavigate('dashboard')}
@@ -370,6 +370,17 @@ export const MyClassesManager: React.FC<MyClassesManagerProps> = ({
                   ⚡ मुख्य डैशबोर्ड
                 </button>
               )}
+              <button
+                onClick={() => {
+                  if (onNavigate) onNavigate('rollover');
+                  else window.location.hash = '#rollover';
+                }}
+                className="px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-md transition flex items-center gap-1.5"
+                title="सत्र समाप्त होने पर कक्षा व छात्र प्रोन्नति विजार्ड"
+              >
+                <span>🔄</span>
+                <span>सत्र परिवर्तन (Rollover)</span>
+              </button>
               <button
                 onClick={() => {
                   setEditingClass(null);

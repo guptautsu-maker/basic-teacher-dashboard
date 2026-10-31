@@ -22,7 +22,7 @@ import { GovtOrderDetailModal } from './GovtOrderDetailModal';
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
   currentUser?: { name: string; email: string } | null;
-  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login') => void;
+  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => void;
 }
 
 const PRIORITY_WEIGHT: Record<TaskPriority, number> = {
@@ -442,6 +442,19 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             >
               <span className="text-lg">📚</span>
               <span>मेरी कक्षाएं (Classes)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onNavigate) onNavigate('rollover');
+                else window.location.hash = '#rollover';
+              }}
+              className="flex-1 sm:flex-initial py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-slate-950 font-bold text-sm shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 min-h-[48px]"
+              title="वार्षिक सत्र परिवर्तन व छात्र प्रोन्नति विजार्ड"
+            >
+              <span className="text-lg">🔄</span>
+              <span>सत्र परिवर्तन (Rollover)</span>
             </button>
 
             <button

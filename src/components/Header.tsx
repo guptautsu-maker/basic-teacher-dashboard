@@ -2,8 +2,8 @@ import React from 'react';
 import { UserProfile } from '../types';
 
 interface HeaderProps {
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   isDrawerOpen: boolean;
@@ -74,6 +74,14 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActivePage('classes')}
           >
             📚 My Classes
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activePage === 'rollover' ? 'active' : ''}`}
+            onClick={() => setActivePage('rollover')}
+            title="वार्षिक सत्र परिवर्तन विजार्ड (Annual Session Rollover)"
+          >
+            🔄 Rollover
           </button>
           <button
             type="button"
