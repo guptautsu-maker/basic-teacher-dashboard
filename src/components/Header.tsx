@@ -2,8 +2,8 @@ import React from 'react';
 import { UserProfile } from '../types';
 
 interface HeaderProps {
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login') => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   isDrawerOpen: boolean;
@@ -11,6 +11,7 @@ interface HeaderProps {
   currentUser: UserProfile | null;
   onLogout: () => void;
   unreadCount?: number;
+  onOpenSearch?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onLogout,
   unreadCount = 0,
+  onOpenSearch,
 }) => {
   return (
     <header className="site-header">
@@ -67,6 +69,14 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActivePage('dashboard')}
           >
             ⚡ Teacher Hub
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activePage === 'safeguards' ? 'active' : ''}`}
+            onClick={() => setActivePage('safeguards')}
+            title="कार्य सुरक्षा, दैनिक चेकलिस्ट व समीक्षा (Safeguards & Reviews)"
+          >
+            🛡️ Safeguards
           </button>
           <button
             type="button"
@@ -167,6 +177,30 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         <div className="header-actions">
+          {/* Universal Search Button */}
+          <button
+            type="button"
+            onClick={onOpenSearch || (() => setActivePage('safeguards'))}
+            className="nav-link"
+            style={{
+              background: 'rgba(0, 245, 212, 0.08)',
+              border: '1px solid rgba(0, 245, 212, 0.25)',
+              padding: '6px 12px',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              borderRadius: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+            title="सार्वभौमिक खोज (Ctrl+K) - सभी मॉड्यूल में खोजें"
+          >
+            <span>🔍</span>
+            <span className="hidden sm:inline">खोजें</span>
+            <kbd style={{ fontSize: '10px', opacity: 0.7, padding: '1px 4px', background: 'rgba(0,0,0,0.1)', borderRadius: '4px' }}>Ctrl+K</kbd>
+          </button>
+
           {/* Direct Bell Icon in Actions */}
           <button
             type="button"

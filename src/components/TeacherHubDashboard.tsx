@@ -16,13 +16,28 @@ import {
   getInitialTeacherHubTrainings,
   getInitialTeacherHubGovtOrders,
 } from '../data/teacherHubSampleData';
+import { Duty } from '../types/duty';
+import { getSampleDuties } from '../utils/trainingsAndDutiesManager';
+import {
+  getCriticalEscalations,
+  generatePendingWorkReportHtml,
+  applyEndOfDayAction,
+} from '../utils/safeguardsManager';
+import { EndOfDayAction } from '../types/safeguards';
+import { StartOfDayModal } from './StartOfDayModal';
+import { EndOfDayModal } from './EndOfDayModal';
+import { GlobalSearchModal } from './GlobalSearchModal';
+import { PortalApp } from '../types/portalApp';
+import { ClassSection } from '../types/classSection';
+import { INITIAL_PORTAL_APPS } from '../data/portalAppData';
+import { getSampleClassSections } from '../utils/myClassesManager';
 import { QuickAddModal } from './QuickAddModal';
 import { GovtOrderDetailModal } from './GovtOrderDetailModal';
 
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
   currentUser?: { name: string; email: string } | null;
-  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => void;
+  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login') => void;
 }
 
 const PRIORITY_WEIGHT: Record<TaskPriority, number> = {
@@ -194,6 +209,71 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   const [selectedOrder, setSelectedOrder] = useState<GovtOrderItem | null>(null);
   const [activeFilterStatus, setActiveFilterStatus] = useState<TaskStatus | 'all'>('all');
   const [timelineDayOffset, setTimelineDayOffset] = useState<number | 'all'>('all');
+
+  // Safeguards Data & Modals
+  const [duties, setDuties] = useState<Duty[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-duties');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getSampleDuties();
+  });
+
+  const [portals] = useState<PortalApp[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-portal-apps');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return INITIAL_PORTAL_APPS;
+  });
+
+  const [classes] = useState<ClassSection[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-class-sections');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getSampleClassSections();
+  });
+
+  const [isStartOfDayOpen, setIsStartOfDayOpen] = useState(false);
+  const [isEndOfDayOpen, setIsEndOfDayOpen] = useState(false);
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+
+  // Critical Escalations (> 3 days overdue)
+  const criticalEscalations = useMemo(() => {
+    return getCriticalEscalations(tasks, new Date(), 3);
+  }, [tasks]);
+
+  const handlePrintPendingReport = () => {
+    const html = generatePendingWorkReportHtml({
+      generatedAt: new Date().toISOString(),
+      schoolName: 'प्राथमिक विद्यालय / Basic Parishadiya Vidyalaya',
+      teacherName: currentUser?.name || 'शिक्षक जी (Primary Teacher)',
+      academicYear: '2024-25',
+      criticalTasks: criticalEscalations,
+      highPriorityPendingTasks: tasks.filter((t) => t.status !== 'done' && (t.priority === 'urgent' || t.priority === 'high')),
+      allPendingTasks: tasks.filter((t) => t.status !== 'done'),
+      pendingDuties: duties.filter((d) => d.status === 'active'),
+      trainingsNearingDeadline: trainings.filter((tr) => tr.status !== 'completed'),
+      unreadGovtOrders: govtOrders.filter((o) => !o.isRead),
+    });
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+      onToast('📄 लंबित कार्य रिपोर्ट तैयार की गई');
+    }
+  };
 
   // Task status transition
   const handleStatusChange = (task: Task, newStatus: TaskStatus) => {
@@ -470,6 +550,250 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
               <span>पोर्टल व ऐप्स (Portals)</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* SAFEGUARD: CRITICAL ESCALATIONS BANNER (>3 DAYS OVERDUE)  */}
+      {/* ========================================================= */}
+      {criticalEscalations.length > 0 && (
+        <div className="rounded-2xl border-2 border-rose-600 bg-rose-100/90 dark:bg-rose-950/80 p-4 sm:p-5 shadow-xl relative overflow-hidden">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <span className="w-12 h-12 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-2xl shadow-md shrink-0 animate-bounce">
+                🚨
+              </span>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-xs font-black uppercase tracking-wider">
+                    अति गंभीर चेतावनी • CRITICAL ESCALATION
+                  </span>
+                  <span className="text-xs font-bold text-rose-700 dark:text-rose-300">
+                    3+ दिन से विलंबित / Overdue &gt; 3 Days
+                  </span>
+                </div>
+                <h3 className="text-lg font-black text-rose-950 dark:text-rose-100 mt-1">
+                  {criticalEscalations.length} कार्य अति गंभीर सीमा पार कर चुके हैं!
+                </h3>
+                <p className="text-xs sm:text-sm text-rose-800 dark:text-rose-200 mt-0.5">
+                  उच्चाधिकारियों/BEO/DIET के औचक निरीक्षण से पूर्व इन कार्यों को सर्वोच्च प्राथमिकता पर पूर्ण करें।
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  if (onNavigate) onNavigate('safeguards');
+                  else window.location.hash = '#safeguards';
+                }}
+                className="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <span>🛡️ गंभीर सूची देखें (View Critical)</span>
+                <span>→</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrintPendingReport}
+                className="px-3.5 py-2.5 rounded-xl bg-white dark:bg-rose-900/60 border border-rose-300 dark:border-rose-700 text-rose-800 dark:text-rose-200 font-bold text-xs sm:text-sm hover:bg-rose-50 transition-all flex items-center justify-center gap-1.5"
+                title="निरीक्षण हेतु आधिकारिक रिपोर्ट प्रिंट करें"
+              >
+                <span>📄</span>
+                <span className="hidden sm:inline">रिपोर्ट</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* SAFEGUARDS HUB: DAILY & WEEKLY WORK PROTECTION SUITE      */}
+      {/* ========================================================= */}
+      <div className="rounded-3xl border border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-emerald-50/70 via-teal-50/50 to-white dark:from-[#132821] dark:via-[#162a23] dark:to-[#12211b] p-4 sm:p-5 shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5 pb-2.5 border-b border-emerald-200/60 dark:border-emerald-800/40">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">🛡️</span>
+            <div>
+              <h3 className="font-extrabold text-sm sm:text-base text-emerald-950 dark:text-emerald-100 flex items-center gap-2">
+                <span>कार्य सुरक्षा कवच व दैनिक समीक्षा</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-200/80 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold">
+                  Zero-Miss Safeguards
+                </span>
+              </h3>
+              <p className="text-xs text-emerald-800 dark:text-emerald-300">
+                दैनिक चेकलिस्ट, शाम की समीक्षा, साप्ताहिक सारांश व निरीक्षण रिपोर्ट
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (onNavigate) onNavigate('safeguards');
+              else window.location.hash = '#safeguards';
+            }}
+            className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-100 flex items-center gap-1 self-start sm:self-center"
+          >
+            <span>पूरा सुरक्षा केंद्र खोलें (Full Hub)</span>
+            <span>→</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {/* 1. Start of Day */}
+          <button
+            type="button"
+            onClick={() => setIsStartOfDayOpen(true)}
+            className="p-3 rounded-2xl bg-white dark:bg-[#1a2f27] border border-amber-200 dark:border-amber-900/60 hover:border-amber-400 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center text-base">
+                🌅
+              </span>
+              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded">
+                सुबह
+              </span>
+            </div>
+            <div>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight group-hover:text-amber-600 transition-colors">
+                दैनिक आरंभ
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Start of Day Checklist
+              </p>
+            </div>
+          </button>
+
+          {/* 2. End of Day */}
+          <button
+            type="button"
+            onClick={() => setIsEndOfDayOpen(true)}
+            className="p-3 rounded-2xl bg-white dark:bg-[#1a2f27] border border-indigo-200 dark:border-indigo-900/60 hover:border-indigo-400 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center text-base">
+                🌇
+              </span>
+              <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded">
+                शाम
+              </span>
+            </div>
+            <div>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight group-hover:text-indigo-600 transition-colors">
+                दैनिक समापन
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                End-of-Day Review
+              </p>
+            </div>
+          </button>
+
+          {/* 3. Weekly Summary */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onNavigate) onNavigate('safeguards');
+              else window.location.hash = '#safeguards';
+            }}
+            className="p-3 rounded-2xl bg-white dark:bg-[#1a2f27] border border-blue-200 dark:border-blue-900/60 hover:border-blue-400 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 flex items-center justify-center text-base">
+                📊
+              </span>
+              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded">
+                रविवार
+              </span>
+            </div>
+            <div>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight group-hover:text-blue-600 transition-colors">
+                साप्ताहिक सारांश
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Weekly Summary Report
+              </p>
+            </div>
+          </button>
+
+          {/* 4. Critical Escalations */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onNavigate) onNavigate('safeguards');
+              else window.location.hash = '#safeguards';
+            }}
+            className="p-3 rounded-2xl bg-white dark:bg-[#1a2f27] border border-rose-200 dark:border-rose-900/60 hover:border-rose-400 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 flex items-center justify-center text-base">
+                🚨
+              </span>
+              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
+                criticalEscalations.length > 0
+                  ? 'bg-rose-600 text-white animate-pulse'
+                  : 'bg-emerald-100 text-emerald-800'
+              }`}>
+                {criticalEscalations.length > 0 ? `${criticalEscalations.length} गंभीर` : '0 गंभीर'}
+              </span>
+            </div>
+            <div>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight group-hover:text-rose-600 transition-colors">
+                अति गंभीर कार्य
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Critical &gt; 3 Days Overdue
+              </p>
+            </div>
+          </button>
+
+          {/* 5. Universal Search */}
+          <button
+            type="button"
+            onClick={() => setIsGlobalSearchOpen(true)}
+            className="p-3 rounded-2xl bg-white dark:bg-[#1a2f27] border border-teal-200 dark:border-teal-900/60 hover:border-teal-400 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 flex items-center justify-center text-base">
+                🔍
+              </span>
+              <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/40 px-1.5 py-0.5 rounded">
+                Ctrl+K
+              </span>
+            </div>
+            <div>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight group-hover:text-teal-600 transition-colors">
+                सार्वभौमिक खोज
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Search All 6 Modules
+              </p>
+            </div>
+          </button>
+
+          {/* 6. Pending Work Report */}
+          <button
+            type="button"
+            onClick={handlePrintPendingReport}
+            className="p-3 rounded-2xl bg-white dark:bg-[#1a2f27] border border-emerald-200 dark:border-emerald-900/60 hover:border-emerald-400 hover:shadow-md transition-all text-left flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-base">
+                📄
+              </span>
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                प्रिंट
+              </span>
+            </div>
+            <div>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight group-hover:text-emerald-600 transition-colors">
+                पेंडिंग रिपोर्ट
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Export Official PDF
+              </p>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -1312,6 +1636,55 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
         onClose={() => setSelectedOrder(null)}
         onAcknowledge={handleAcknowledgeOrder}
         onToast={onToast}
+      />
+
+      {/* Start of Day Checklist Modal */}
+      <StartOfDayModal
+        isOpen={isStartOfDayOpen}
+        onClose={() => setIsStartOfDayOpen(false)}
+        tasks={tasks}
+        duties={duties}
+        meetings={meetings}
+        onCompleteTask={(taskId: string) => {
+          const target = tasks.find((t) => t.id === taskId);
+          if (target) handleStatusChange(target, 'done');
+        }}
+        onNavigate={onNavigate}
+        onToast={onToast}
+      />
+
+      {/* End of Day Review Modal */}
+      <EndOfDayModal
+        isOpen={isEndOfDayOpen}
+        onClose={() => setIsEndOfDayOpen(false)}
+        tasks={tasks}
+        onTasksUpdated={(updatedTasks: Task[]) => {
+          saveTasks(updatedTasks);
+          onToast('✅ शाम की समीक्षा सुरक्षित की गई');
+        }}
+        onToast={onToast}
+        currentUser={currentUser}
+      />
+
+      {/* Universal Search Modal (6 Modules) */}
+      <GlobalSearchModal
+        isOpen={isGlobalSearchOpen}
+        onClose={() => setIsGlobalSearchOpen(false)}
+        tasks={tasks}
+        orders={govtOrders}
+        meetings={meetings}
+        trainings={trainings}
+        portals={portals}
+        classes={classes}
+        onNavigate={(page) => {
+          if (onNavigate) onNavigate(page);
+          else window.location.hash = `#${page}`;
+          setIsGlobalSearchOpen(false);
+        }}
+        onSelectTask={(task: Task) => {
+          setIsGlobalSearchOpen(false);
+          onToast(`कार्य चुना गया: ${task.title}`);
+        }}
       />
     </div>
   );

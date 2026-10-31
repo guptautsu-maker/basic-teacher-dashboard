@@ -4,8 +4,8 @@ import { UserProfile } from '../types';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login') => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
   unreadCount?: number;
@@ -20,7 +20,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onLogout,
   unreadCount = 0,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login') => {
+  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login') => {
     setActivePage(page);
     onClose();
   };
@@ -54,6 +54,12 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           onClick={() => handleNavigate('dashboard')}
         >
           ⚡ Teacher Hub (मुख्य डैशबोर्ड)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'safeguards' ? 'active' : ''}`}
+          onClick={() => handleNavigate('safeguards')}
+        >
+          🛡️ Safeguards (कार्य सुरक्षा व समीक्षा)
         </button>
         <button
           className={`drawer-link ${activePage === 'classes' ? 'active' : ''}`}

@@ -15,9 +15,27 @@ import { DutiesManager } from './components/DutiesManager';
 import { NotificationCenter } from './components/NotificationCenter';
 import { MyClassesManager } from './components/MyClassesManager';
 import { AnnualRolloverWizard } from './components/AnnualRolloverWizard';
+import { SafeguardsHub } from './components/SafeguardsHub';
+import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { useReminderService } from './utils/useReminderService';
 import { getStoredUser, setStoredUser, supabase } from './supabase';
 import { UserProfile } from './types';
+import { Task } from './utils/taskStatusSystem';
+import { Duty } from './types/duty';
+import {
+  MeetingItem,
+  TrainingItem,
+  GovtOrderItem,
+  getInitialTeacherHubTasks,
+  getInitialTeacherHubMeetings,
+  getInitialTeacherHubTrainings,
+  getInitialTeacherHubGovtOrders,
+} from './data/teacherHubSampleData';
+import { getSampleDuties } from './utils/trainingsAndDutiesManager';
+import { INITIAL_PORTAL_APPS } from './data/portalAppData';
+import { getSampleClassSections } from './utils/myClassesManager';
+import { PortalApp } from './types/portalApp';
+import { ClassSection } from './types/classSection';
 
 export const App: React.FC = () => {
   // Theme management
@@ -62,10 +80,11 @@ export const App: React.FC = () => {
 
   // Page Routing
   const [activePage, setActivePage] = useState<
-    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login'
+    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login'
   >(() => {
     const hash = window.location.hash.toLowerCase();
     if (hash.includes('dashboard')) return 'dashboard';
+    if (hash.includes('safeguard') || hash.includes('review') || hash.includes('summary')) return 'safeguards';
     if (hash.includes('rollover') || hash.includes('session')) return 'rollover';
     if (hash.includes('class')) return 'classes';
     if (hash.includes('notif') || hash.includes('alert') || hash.includes('remind')) return 'notifications';
@@ -83,6 +102,7 @@ export const App: React.FC = () => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
       if (hash.includes('dashboard')) setActivePage('dashboard');
+      else if (hash.includes('safeguard') || hash.includes('review') || hash.includes('summary')) setActivePage('safeguards');
       else if (hash.includes('rollover') || hash.includes('session')) setActivePage('rollover');
       else if (hash.includes('class')) setActivePage('classes');
       else if (hash.includes('notif') || hash.includes('alert') || hash.includes('remind')) setActivePage('notifications');
@@ -101,12 +121,14 @@ export const App: React.FC = () => {
   }, []);
 
   const navigateTo = (
-    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'login'
+    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login'
   ) => {
     setActivePage(page);
     window.location.hash =
       page === 'home'
         ? ''
+        : page === 'safeguards'
+        ? 'safeguards'
         : page === 'govt_orders'
         ? 'govt-orders'
         : page === 'meetings'
@@ -179,6 +201,130 @@ export const App: React.FC = () => {
   // Mobile drawer
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
+  // Global search modal & keyboard shortcut (Ctrl+K / Cmd+K)
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsGlobalSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Shared Data State for Safeguards & Universal Search across modules
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-tasks');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getInitialTeacherHubTasks();
+  });
+
+  const [duties, setDuties] = useState<Duty[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-duties');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getSampleDuties();
+  });
+
+  const [meetings, setMeetings] = useState<MeetingItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-meetings');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getInitialTeacherHubMeetings();
+  });
+
+  const [trainings, setTrainings] = useState<TrainingItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-trainings');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getInitialTeacherHubTrainings();
+  });
+
+  const [orders, setOrders] = useState<GovtOrderItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-govt-orders');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getInitialTeacherHubGovtOrders();
+  });
+
+  const [portals, setPortals] = useState<PortalApp[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-portal-apps');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return INITIAL_PORTAL_APPS;
+  });
+
+  const [classes, setClasses] = useState<ClassSection[]>(() => {
+    try {
+      const saved = localStorage.getItem('th-class-sections');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return getSampleClassSections();
+  });
+
+  const refreshAllData = () => {
+    try {
+      const t = localStorage.getItem('th-tasks');
+      if (t) setTasks(JSON.parse(t));
+      const d = localStorage.getItem('th-duties');
+      if (d) setDuties(JSON.parse(d));
+      const m = localStorage.getItem('th-meetings');
+      if (m) setMeetings(JSON.parse(m));
+      const tr = localStorage.getItem('th-trainings');
+      if (tr) setTrainings(JSON.parse(tr));
+      const o = localStorage.getItem('th-govt-orders');
+      if (o) setOrders(JSON.parse(o));
+      const p = localStorage.getItem('th-portal-apps');
+      if (p) setPortals(JSON.parse(p));
+      const c = localStorage.getItem('th-class-sections');
+      if (c) setClasses(JSON.parse(c));
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('storage', refreshAllData);
+    window.addEventListener('focus', refreshAllData);
+    return () => {
+      window.removeEventListener('storage', refreshAllData);
+      window.removeEventListener('focus', refreshAllData);
+    };
+  }, []);
+
+  const handleTasksUpdated = (updatedTasks: Task[]) => {
+    setTasks(updatedTasks);
+    try {
+      localStorage.setItem('th-tasks', JSON.stringify(updatedTasks));
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Header
@@ -191,6 +337,7 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onLogout={handleLogout}
         unreadCount={reminderService.unreadCount}
+        onOpenSearch={() => setIsGlobalSearchOpen(true)}
       />
 
       <MobileDrawer
@@ -285,6 +432,23 @@ export const App: React.FC = () => {
             onNavigate={navigateTo}
           />
         )}
+        {activePage === 'safeguards' && (
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6">
+            <SafeguardsHub
+              tasks={tasks}
+              onTasksUpdated={handleTasksUpdated}
+              duties={duties}
+              meetings={meetings}
+              trainings={trainings}
+              orders={orders}
+              portals={portals}
+              classes={classes}
+              onToast={showToast}
+              onNavigate={navigateTo}
+              currentUser={currentUser}
+            />
+          </div>
+        )}
         {activePage === 'login' && (
           <Login
             onSuccess={(profile) => {
@@ -301,6 +465,26 @@ export const App: React.FC = () => {
         variant={activePage === 'home' ? 'full' : 'slim'}
         onNavigate={navigateTo}
         onToast={showToast}
+      />
+
+      <GlobalSearchModal
+        isOpen={isGlobalSearchOpen}
+        onClose={() => setIsGlobalSearchOpen(false)}
+        tasks={tasks}
+        orders={orders}
+        meetings={meetings}
+        trainings={trainings}
+        portals={portals}
+        classes={classes}
+        onNavigate={(page) => {
+          navigateTo(page);
+          setIsGlobalSearchOpen(false);
+        }}
+        onSelectTask={(task: Task) => {
+          navigateTo('dashboard');
+          setIsGlobalSearchOpen(false);
+          showToast(`कार्य चुना गया: ${task.title}`);
+        }}
       />
 
       <Toast message={toastMessage} />

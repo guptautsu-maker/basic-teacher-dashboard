@@ -71,13 +71,13 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       type: 'portal_entry',
       source: 'UDISE+ Portal',
       portalUrl: 'https://udiseplus.gov.in',
-      deadline: toIso(-2, 17, 0), // 2 days ago
+      deadline: toIso(-4, 17, 0), // 4 days ago (Critical > 3 days)
       priority: 'urgent',
       status: 'overdue',
       recurrence: 'none',
       assignedTo: 'सहायक अध्यापक / Assistant Teacher',
-      createdAt: toIso(-7),
-      updatedAt: toIso(-2),
+      createdAt: toIso(-10),
+      updatedAt: toIso(-4),
     },
     {
       id: 'th-task-od-2',
