@@ -4,10 +4,11 @@ import { UserProfile } from '../types';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login') => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
+  unreadCount?: number;
 }
 
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({
@@ -17,8 +18,9 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   setActivePage,
   currentUser,
   onLogout,
+  unreadCount = 0,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => {
+  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login') => {
     setActivePage(page);
     onClose();
   };
@@ -52,6 +54,27 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           onClick={() => handleNavigate('dashboard')}
         >
           ⚡ Teacher Hub (मुख्य डैशबोर्ड)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'notifications' ? 'active' : ''}`}
+          onClick={() => handleNavigate('notifications')}
+        >
+          🔔 Notification Center (सूचना केंद्र)
+          {unreadCount > 0 && (
+            <span
+              style={{
+                marginLeft: 'auto',
+                backgroundColor: '#EF4444',
+                color: '#fff',
+                fontSize: '11px',
+                fontWeight: 800,
+                borderRadius: '9999px',
+                padding: '1px 7px',
+              }}
+            >
+              {unreadCount}
+            </span>
+          )}
         </button>
         <button
           className={`drawer-link ${activePage === 'trainings' ? 'active' : ''}`}

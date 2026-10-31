@@ -2,14 +2,15 @@ import React from 'react';
 import { UserProfile } from '../types';
 
 interface HeaderProps {
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login') => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   isDrawerOpen: boolean;
   setIsDrawerOpen: (open: boolean) => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
+  unreadCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   setIsDrawerOpen,
   currentUser,
   onLogout,
+  unreadCount = 0,
 }) => {
   return (
     <header className="site-header">
@@ -65,6 +67,32 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActivePage('dashboard')}
           >
             ⚡ Teacher Hub
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activePage === 'notifications' ? 'active' : ''}`}
+            onClick={() => setActivePage('notifications')}
+            style={{ position: 'relative' }}
+          >
+            🔔 Alerts
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-6px',
+                  backgroundColor: '#EF4444',
+                  color: '#fff',
+                  fontSize: '10px',
+                  fontWeight: 800,
+                  borderRadius: '9999px',
+                  padding: '1px 5px',
+                  lineHeight: '1.2',
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
           </button>
           <button
             type="button"
@@ -124,6 +152,44 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         <div className="header-actions">
+          {/* Direct Bell Icon in Actions */}
+          <button
+            type="button"
+            onClick={() => setActivePage('notifications')}
+            className={`nav-link ${activePage === 'notifications' ? 'active' : ''}`}
+            style={{
+              position: 'relative',
+              background: activePage === 'notifications' ? 'rgba(0, 245, 212, 0.15)' : 'none',
+              border: 'none',
+              padding: '6px 10px',
+              fontSize: '16px',
+              cursor: 'pointer',
+              borderRadius: '12px',
+            }}
+            title="सूचना व रिमाइंडर केंद्र (Notification Center)"
+          >
+            🔔
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '2px',
+                  right: '2px',
+                  backgroundColor: '#EF4444',
+                  color: '#fff',
+                  fontSize: '9px',
+                  fontWeight: 900,
+                  borderRadius: '9999px',
+                  padding: '1px 4px',
+                  minWidth: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
           <button
             className="theme-toggle"
             onClick={toggleTheme}

@@ -22,7 +22,7 @@ import { GovtOrderDetailModal } from './GovtOrderDetailModal';
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
   currentUser?: { name: string; email: string } | null;
-  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login') => void;
+  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login') => void;
 }
 
 const PRIORITY_WEIGHT: Record<TaskPriority, number> = {

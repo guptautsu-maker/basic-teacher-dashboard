@@ -12,6 +12,8 @@ import { GovtOrdersManager } from './components/GovtOrdersManager';
 import { MeetingsManager } from './components/MeetingsManager';
 import { TrainingsManager } from './components/TrainingsManager';
 import { DutiesManager } from './components/DutiesManager';
+import { NotificationCenter } from './components/NotificationCenter';
+import { useReminderService } from './utils/useReminderService';
 import { getStoredUser, setStoredUser, supabase } from './supabase';
 import { UserProfile } from './types';
 
@@ -41,12 +43,28 @@ export const App: React.FC = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
+  // Toast notifications
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimerRef = useRef<any>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, 2800);
+  };
+
+  // Reminders Service Layer (runs on app load + every 15 minutes)
+  const reminderService = useReminderService(showToast);
+
   // Page Routing
   const [activePage, setActivePage] = useState<
-    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login'
+    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login'
   >(() => {
     const hash = window.location.hash.toLowerCase();
     if (hash.includes('dashboard')) return 'dashboard';
+    if (hash.includes('notif') || hash.includes('alert') || hash.includes('remind')) return 'notifications';
     if (hash.includes('train')) return 'trainings';
     if (hash.includes('dut') || hash.includes('roster')) return 'duties';
     if (hash.includes('portal')) return 'portals';
@@ -61,6 +79,7 @@ export const App: React.FC = () => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
       if (hash.includes('dashboard')) setActivePage('dashboard');
+      else if (hash.includes('notif') || hash.includes('alert') || hash.includes('remind')) setActivePage('notifications');
       else if (hash.includes('train')) setActivePage('trainings');
       else if (hash.includes('dut') || hash.includes('roster')) setActivePage('duties');
       else if (hash.includes('portal')) setActivePage('portals');
@@ -76,7 +95,7 @@ export const App: React.FC = () => {
   }, []);
 
   const navigateTo = (
-    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'login'
+    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'login'
   ) => {
     setActivePage(page);
     window.location.hash =
@@ -90,20 +109,10 @@ export const App: React.FC = () => {
         ? 'trainings'
         : page === 'duties'
         ? 'duties'
+        : page === 'notifications'
+        ? 'notifications'
         : page;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Toast notifications
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const toastTimerRef = useRef<any>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = setTimeout(() => {
-      setToastMessage(null);
-    }, 2800);
   };
 
   // User Profile & Authentication
@@ -171,6 +180,7 @@ export const App: React.FC = () => {
         setIsDrawerOpen={setIsDrawerOpen}
         currentUser={currentUser}
         onLogout={handleLogout}
+        unreadCount={reminderService.unreadCount}
       />
 
       <MobileDrawer
@@ -180,10 +190,29 @@ export const App: React.FC = () => {
         setActivePage={navigateTo}
         currentUser={currentUser}
         onLogout={handleLogout}
+        unreadCount={reminderService.unreadCount}
       />
 
       <div style={{ flex: 1 }}>
         {activePage === 'home' && <Home onNavigate={navigateTo} onToast={showToast} />}
+        {activePage === 'notifications' && (
+          <NotificationCenter
+            notifications={reminderService.notifications}
+            settings={reminderService.settings}
+            unreadCount={reminderService.unreadCount}
+            lastCheckedAt={reminderService.lastCheckedAt}
+            isScanning={reminderService.isScanning}
+            onScanNow={reminderService.scanNow}
+            onSnooze={reminderService.handleSnooze}
+            onDismiss={reminderService.handleDismiss}
+            onMarkRead={reminderService.handleMarkRead}
+            onMarkAllRead={reminderService.handleMarkAllRead}
+            onClearAll={reminderService.handleClearAll}
+            onUpdateSettings={reminderService.updateSettings}
+            onNavigate={navigateTo}
+            onToast={showToast}
+          />
+        )}
         {activePage === 'dashboard' && (
           <Dashboard
             currentUser={currentUser}
