@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Sheets } from './pages/Sheets';
 import { Login } from './pages/Login';
 import { PortalsManager } from './components/PortalsManager';
+import { GovtOrdersManager } from './components/GovtOrdersManager';
 import { getStoredUser, setStoredUser, supabase } from './supabase';
 import { UserProfile } from './types';
 
@@ -39,11 +40,12 @@ export const App: React.FC = () => {
 
   // Page Routing
   const [activePage, setActivePage] = useState<
-    'home' | 'dashboard' | 'portals' | 'sheets' | 'login'
+    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login'
   >(() => {
     const hash = window.location.hash.toLowerCase();
     if (hash.includes('dashboard')) return 'dashboard';
     if (hash.includes('portal')) return 'portals';
+    if (hash.includes('order') || hash.includes('shashanadesh') || hash.includes('govt')) return 'govt_orders';
     if (hash.includes('sheets')) return 'sheets';
     if (hash.includes('login')) return 'login';
     return 'home';
@@ -54,6 +56,7 @@ export const App: React.FC = () => {
       const hash = window.location.hash.toLowerCase();
       if (hash.includes('dashboard')) setActivePage('dashboard');
       else if (hash.includes('portal')) setActivePage('portals');
+      else if (hash.includes('order') || hash.includes('shashanadesh') || hash.includes('govt')) setActivePage('govt_orders');
       else if (hash.includes('sheets')) setActivePage('sheets');
       else if (hash.includes('login')) setActivePage('login');
       else if (hash.includes('home') || hash === '') setActivePage('home');
@@ -64,10 +67,10 @@ export const App: React.FC = () => {
   }, []);
 
   const navigateTo = (
-    page: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login'
+    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login'
   ) => {
     setActivePage(page);
-    window.location.hash = page === 'home' ? '' : page;
+    window.location.hash = page === 'home' ? '' : page === 'govt_orders' ? 'govt-orders' : page;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -172,6 +175,13 @@ export const App: React.FC = () => {
           <PortalsManager
             onToast={showToast}
             onNavigate={navigateTo}
+          />
+        )}
+        {activePage === 'govt_orders' && (
+          <GovtOrdersManager
+            onToast={showToast}
+            onNavigate={navigateTo}
+            currentUser={currentUser}
           />
         )}
         {activePage === 'sheets' && (

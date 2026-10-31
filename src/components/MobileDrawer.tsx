@@ -4,8 +4,8 @@ import { UserProfile } from '../types';
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login') => void;
+  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login';
+  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login') => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
 }
@@ -18,7 +18,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   currentUser,
   onLogout,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'sheets' | 'login') => {
+  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login') => {
     setActivePage(page);
     onClose();
   };
@@ -58,6 +58,12 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           onClick={() => handleNavigate('portals')}
         >
           🌐 Portals & Apps (सरकारी पोर्टल)
+        </button>
+        <button
+          className={`drawer-link ${activePage === 'govt_orders' ? 'active' : ''}`}
+          onClick={() => handleNavigate('govt_orders')}
+        >
+          📜 Govt Orders (शासनादेश व आदेश)
         </button>
         <button
           className={`drawer-link ${activePage === 'sheets' ? 'active' : ''}`}

@@ -72,7 +72,7 @@ const DEFAULT_QUICK_NOTES: QuickNote[] = [
 interface DashboardProps {
   currentUser: UserProfile | null;
   onToast: (msg: string) => void;
-  onNavigate: (page: 'home' | 'dashboard' | 'sheets' | 'login') => void;
+  onNavigate: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login') => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNavigate }) => {
@@ -809,7 +809,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
       </div>
 
       {dashboardMode === 'teacher_hub' ? (
-        <TeacherHubDashboard onToast={onToast} currentUser={currentUser} />
+        <TeacherHubDashboard onToast={onToast} currentUser={currentUser} onNavigate={onNavigate} />
       ) : (
         <>
           {/* Portals and Apps Module */}

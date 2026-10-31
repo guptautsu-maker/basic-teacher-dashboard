@@ -22,6 +22,7 @@ import { GovtOrderDetailModal } from './GovtOrderDetailModal';
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
   currentUser?: { name: string; email: string } | null;
+  onNavigate?: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'sheets' | 'login') => void;
 }
 
 const PRIORITY_WEIGHT: Record<TaskPriority, number> = {
@@ -68,6 +69,7 @@ const PRIORITY_BADGES: Record<
 export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   onToast,
   currentUser,
+  onNavigate,
 }) => {
   // -------------------------------------------------------------
   // Persistent State
@@ -125,6 +127,26 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
         // ignore
       }
     }
+  }, []);
+
+  // Listen for storage or focus updates from GovtOrdersManager
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const savedTasks = localStorage.getItem('th-tasks');
+        if (savedTasks) setTasks(JSON.parse(savedTasks));
+        const savedOrders = localStorage.getItem('th-govt-orders');
+        if (savedOrders) setGovtOrders(JSON.parse(savedOrders));
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('focus', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('focus', handleSync);
+    };
   }, []);
 
   // Save changes
@@ -883,7 +905,17 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            {onNavigate && (
+              <button
+                type="button"
+                onClick={() => onNavigate('govt_orders')}
+                className="text-xs font-bold px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#0D5B49] to-[#00F5D4] text-[#13231C] shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
+              >
+                <span>📜</span>
+                <span>सम्पूर्ण शासनादेश मॉड्यूल →</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
