@@ -36,6 +36,12 @@ import { INITIAL_PORTAL_APPS } from './data/portalAppData';
 import { getSampleClassSections } from './utils/myClassesManager';
 import { PortalApp } from './types/portalApp';
 import { ClassSection } from './types/classSection';
+import { SettingsModal } from './components/SettingsModal';
+import { AppSettings, UserRole } from './types/settingsAndPrivacy';
+import {
+  getStoredAppSettings,
+  saveStoredAppSettings,
+} from './utils/privacyAndSecurityManager';
 
 export const App: React.FC = () => {
   // Theme management
@@ -204,6 +210,46 @@ export const App: React.FC = () => {
   // Global search modal & keyboard shortcut (Ctrl+K / Cmd+K)
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
 
+  // Global App Settings, Role Setup, DPDP Privacy & Local JSON Backup Modal
+  const [appSettings, setAppSettings] = useState<AppSettings>(() => getStoredAppSettings());
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [settingsModalTab, setSettingsModalTab] = useState<
+    'general' | 'school' | 'notifications' | 'privacy' | 'backup'
+  >('general');
+
+  useEffect(() => {
+    const syncAppSettings = () => {
+      setAppSettings(getStoredAppSettings());
+    };
+    window.addEventListener('th-settings-updated', syncAppSettings);
+    window.addEventListener('storage', syncAppSettings);
+    return () => {
+      window.removeEventListener('th-settings-updated', syncAppSettings);
+      window.removeEventListener('storage', syncAppSettings);
+    };
+  }, []);
+
+  const handleUpdateAppSettings = (updated: AppSettings) => {
+    saveStoredAppSettings(updated);
+    setAppSettings(updated);
+    window.dispatchEvent(new Event('th-settings-updated'));
+  };
+
+  const handleGlobalRoleChange = (newRole: UserRole) => {
+    handleUpdateAppSettings({
+      ...appSettings,
+      role: newRole,
+    });
+    showToast(
+      newRole === 'teacher'
+        ? '🧑‍🏫 शिक्षक दृश्य (Teacher View - Default) सक्रिय किया गया'
+        : '🏫 प्रधानाध्यापक / Admin निरीक्षण दृश्य सक्रिय किया गया'
+    );
+    if (activePage !== 'dashboard') {
+      navigateTo('dashboard');
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -302,6 +348,7 @@ export const App: React.FC = () => {
       if (p) setPortals(JSON.parse(p));
       const c = localStorage.getItem('th-class-sections');
       if (c) setClasses(JSON.parse(c));
+      setAppSettings(getStoredAppSettings());
     } catch {
       // ignore
     }
@@ -338,6 +385,12 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
         unreadCount={reminderService.unreadCount}
         onOpenSearch={() => setIsGlobalSearchOpen(true)}
+        onOpenSettings={(tab = 'general') => {
+          setSettingsModalTab(tab);
+          setIsSettingsModalOpen(true);
+        }}
+        activeRole={appSettings.role}
+        onRoleChange={handleGlobalRoleChange}
       />
 
       <MobileDrawer
@@ -485,6 +538,19 @@ export const App: React.FC = () => {
           setIsGlobalSearchOpen(false);
           showToast(`कार्य चुना गया: ${task.title}`);
         }}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        settings={appSettings}
+        onUpdateSettings={handleUpdateAppSettings}
+        onDataRestored={() => {
+          refreshAllData();
+          window.dispatchEvent(new Event('storage'));
+        }}
+        onToast={showToast}
+        initialTab={settingsModalTab}
       />
 
       <Toast message={toastMessage} />

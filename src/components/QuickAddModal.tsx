@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Task, TaskPriority, TaskType, RecurrenceFrequency, createNewTask } from '../utils/taskStatusSystem';
 import { MeetingItem, TrainingItem } from '../data/teacherHubSampleData';
+import { validateSensitiveData } from '../utils/privacyAndSecurityManager';
+import { SensitiveDataAlert } from './SensitiveDataGuardNotice';
 
 interface QuickAddModalProps {
   isOpen: boolean;
@@ -58,12 +60,40 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   const [trainingCert, setTrainingCert] = useState(true);
   const [trainingLink, setTrainingLink] = useState('https://diksha.gov.in');
 
+  // Real-time Aadhaar & Password Sensitive Data Guard (DPDP Act 2023)
+  const sensitiveValidation = useMemo(() => {
+    if (activeTab === 'task') {
+      return validateSensitiveData(`${taskTitle} ${taskSource} ${taskDescription}`);
+    }
+    if (activeTab === 'meeting') {
+      return validateSensitiveData(`${meetingTitle} ${meetingLocation} ${meetingAgenda} ${meetingOrganizedBy}`);
+    }
+    return validateSensitiveData(`${trainingName} ${trainingProvider} ${trainingLink}`);
+  }, [
+    activeTab,
+    taskTitle,
+    taskSource,
+    taskDescription,
+    meetingTitle,
+    meetingLocation,
+    meetingAgenda,
+    meetingOrganizedBy,
+    trainingName,
+    trainingProvider,
+    trainingLink,
+  ]);
+
   if (!isOpen) return null;
 
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!taskTitle.trim()) {
       onToast('कृपया कार्य का शीर्षक दर्ज करें / Please enter task title');
+      return;
+    }
+
+    if (!sensitiveValidation.isValid) {
+      onToast('🚨 सुरक्षा रोक: आधार संख्या या पासवर्ड दर्ज करना वर्जित है (DPDP Act 2023)!');
       return;
     }
 
@@ -97,6 +127,11 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
       return;
     }
 
+    if (!sensitiveValidation.isValid) {
+      onToast('🚨 सुरक्षा रोक: आधार संख्या या पासवर्ड दर्ज करना वर्जित है (DPDP Act 2023)!');
+      return;
+    }
+
     const newMeeting: MeetingItem = {
       id: `meet_${Date.now()}`,
       title: meetingTitle.trim(),
@@ -118,6 +153,11 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     e.preventDefault();
     if (!trainingName.trim()) {
       onToast('कृपया प्रशिक्षण का नाम दर्ज करें / Please enter training name');
+      return;
+    }
+
+    if (!sensitiveValidation.isValid) {
+      onToast('🚨 सुरक्षा रोक: आधार संख्या या पासवर्ड दर्ज करना वर्जित है (DPDP Act 2023)!');
       return;
     }
 
@@ -224,6 +264,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
         {/* Form Body */}
         <div className="p-5 overflow-y-auto space-y-4 flex-1">
+          <SensitiveDataAlert validation={sensitiveValidation} />
           {activeTab === 'task' && (
             <form onSubmit={handleCreateTask} className="space-y-4">
               <div>

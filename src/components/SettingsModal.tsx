@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   AppSettings,
   AppLanguage,
@@ -20,6 +20,7 @@ interface SettingsModalProps {
   onUpdateSettings: (newSettings: AppSettings) => void;
   onToast: (msg: string) => void;
   onDataRestored?: () => void;
+  initialTab?: SettingsTab;
 }
 
 type SettingsTab = 'general' | 'school' | 'notifications' | 'privacy' | 'backup';
@@ -31,10 +32,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateSettings,
   onToast,
   onDataRestored,
+  initialTab = 'general',
 }) => {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
   const [formSettings, setFormSettings] = useState<AppSettings>(settings);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
+      setFormSettings(settings);
+    }
+  }, [isOpen, initialTab, settings]);
 
   // Backup restore state
   const [importFile, setImportFile] = useState<File | null>(null);

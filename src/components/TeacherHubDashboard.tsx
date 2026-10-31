@@ -33,6 +33,13 @@ import { INITIAL_PORTAL_APPS } from '../data/portalAppData';
 import { getSampleClassSections } from '../utils/myClassesManager';
 import { QuickAddModal } from './QuickAddModal';
 import { GovtOrderDetailModal } from './GovtOrderDetailModal';
+import { AppSettings, UserRole } from '../types/settingsAndPrivacy';
+import {
+  getStoredAppSettings,
+  saveStoredAppSettings,
+} from '../utils/privacyAndSecurityManager';
+import { HeadAdminOversightView } from './HeadAdminOversightView';
+import { SettingsModal } from './SettingsModal';
 
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
@@ -244,6 +251,50 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   const [isStartOfDayOpen, setIsStartOfDayOpen] = useState(false);
   const [isEndOfDayOpen, setIsEndOfDayOpen] = useState(false);
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+
+  // Settings, Role Setup, DPDP Privacy & Backup Modal State
+  const [appSettings, setAppSettings] = useState<AppSettings>(() => getStoredAppSettings());
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<
+    'general' | 'school' | 'notifications' | 'privacy' | 'backup'
+  >('general');
+
+  useEffect(() => {
+    const syncSettings = () => {
+      setAppSettings(getStoredAppSettings());
+    };
+    window.addEventListener('th-settings-updated', syncSettings);
+    window.addEventListener('storage', syncSettings);
+    return () => {
+      window.removeEventListener('th-settings-updated', syncSettings);
+      window.removeEventListener('storage', syncSettings);
+    };
+  }, []);
+
+  const handleUpdateSettings = (updated: AppSettings) => {
+    saveStoredAppSettings(updated);
+    setAppSettings(updated);
+    window.dispatchEvent(new Event('th-settings-updated'));
+  };
+
+  const handleSwitchRole = (newRole: UserRole) => {
+    handleUpdateSettings({
+      ...appSettings,
+      role: newRole,
+    });
+    onToast(
+      newRole === 'teacher'
+        ? '🧑‍🏫 शिक्षक दृश्य (Teacher View - Default) सक्रिय किया गया'
+        : '🏫 प्रधानाध्यापक / Admin निरीक्षण दृश्य सक्रिय किया गया'
+    );
+  };
+
+  const openSettingsWithTab = (
+    tab: 'general' | 'school' | 'notifications' | 'privacy' | 'backup'
+  ) => {
+    setSettingsTab(tab);
+    setIsSettingsOpen(true);
+  };
 
   // Critical Escalations (> 3 days overdue)
   const criticalEscalations = useMemo(() => {
@@ -552,6 +603,103 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* ROLE SETUP, SCHOOL PROFILE, DPDP PRIVACY & BACKUP BAR     */}
+      {/* ========================================================= */}
+      <div className="rounded-2xl border border-teal-200 dark:border-teal-800/60 bg-white dark:bg-[#14241E] p-4 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        {/* Left: Role Switcher + School & Academic Year Info */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => handleSwitchRole('teacher')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                appSettings.role === 'teacher'
+                  ? 'bg-[#0D5B49] text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+              }`}
+            >
+              <span>🧑‍🏫</span>
+              <span>शिक्षक (Teacher - Default)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchRole('headmaster')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                appSettings.role === 'headmaster' || appSettings.role === 'admin'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+              }`}
+            >
+              <span>🏫</span>
+              <span>प्रधानाध्यापक / Admin View</span>
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800 text-teal-800 dark:text-teal-200 font-bold">
+              🏫 {appSettings.schoolProfile.schoolName} (UDISE+: {appSettings.schoolProfile.udiseCode})
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 font-bold">
+              📅 सत्र: {appSettings.activeAcademicYear}
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200 font-bold">
+              🌐 भाषा: {appSettings.language === 'hi' ? 'हिन्दी' : appSettings.language === 'en' ? 'English' : 'द्विभाषी (Hi+En)'}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Quick Action Buttons for DPDP Notice, Backup/Restore & Settings */}
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <button
+            type="button"
+            onClick={() => openSettingsWithTab('privacy')}
+            className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-all"
+            title="DPDP Act 2023 छात्र डेटा न्यूनतमीकरण एवं जीरो-आधार/पासवर्ड नीति"
+          >
+            <span>🔒</span>
+            <span>DPDP गोपनीयता नोटिस (2023)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openSettingsWithTab('backup')}
+            className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/60 border border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200 text-xs font-bold flex items-center gap-1.5 transition-all"
+            title="लोकल JSON बैकअप डाउनलोड व रीस्टोर (Export & Import)"
+          >
+            <span>💾</span>
+            <span>बैकअप व रीस्टोर (JSON)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openSettingsWithTab('general')}
+            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 dark:bg-teal-600 dark:hover:bg-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+          >
+            <span>⚙️</span>
+            <span>सेटिंग्स (Settings)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* HEADMASTER / ADMIN PLACEHOLDER & OVERSIGHT VIEW           */}
+      {/* ========================================================= */}
+      {(appSettings.role === 'headmaster' || appSettings.role === 'admin') && (
+        <HeadAdminOversightView
+          currentRole={appSettings.role}
+          onRoleChange={handleSwitchRole}
+          tasks={tasks}
+          duties={duties}
+          meetings={meetings}
+          trainings={trainings}
+          orders={govtOrders}
+          schoolName={`${appSettings.schoolProfile.schoolName} (${appSettings.schoolProfile.udiseCode})`}
+          onToast={onToast}
+          onNavigate={onNavigate}
+        />
+      )}
 
       {/* ========================================================= */}
       {/* SAFEGUARD: CRITICAL ESCALATIONS BANNER (>3 DAYS OVERDUE)  */}
@@ -1685,6 +1833,34 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
           setIsGlobalSearchOpen(false);
           onToast(`कार्य चुना गया: ${task.title}`);
         }}
+      />
+
+      {/* Settings, School Profile, DPDP Privacy & Local JSON Backup Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={appSettings}
+        onUpdateSettings={handleUpdateSettings}
+        onDataRestored={() => {
+          setAppSettings(getStoredAppSettings());
+          try {
+            const t = localStorage.getItem('th-tasks');
+            if (t) setTasks(JSON.parse(t));
+            const d = localStorage.getItem('th-duties');
+            if (d) setDuties(JSON.parse(d));
+            const m = localStorage.getItem('th-meetings');
+            if (m) setMeetings(JSON.parse(m));
+            const tr = localStorage.getItem('th-trainings');
+            if (tr) setTrainings(JSON.parse(tr));
+            const o = localStorage.getItem('th-govt-orders');
+            if (o) setGovtOrders(JSON.parse(o));
+          } catch {
+            // ignore
+          }
+          window.dispatchEvent(new Event('storage'));
+        }}
+        onToast={onToast}
+        initialTab={settingsTab}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserProfile } from '../types';
+import { UserRole } from '../types/settingsAndPrivacy';
 
 interface HeaderProps {
   activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login';
@@ -12,6 +13,9 @@ interface HeaderProps {
   onLogout: () => void;
   unreadCount?: number;
   onOpenSearch?: () => void;
+  onOpenSettings?: (initialTab?: 'general' | 'school' | 'notifications' | 'privacy' | 'backup') => void;
+  activeRole?: UserRole;
+  onRoleChange?: (role: UserRole) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,6 +29,9 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   unreadCount = 0,
   onOpenSearch,
+  onOpenSettings,
+  activeRole = 'teacher',
+  onRoleChange,
 }) => {
   return (
     <header className="site-header">
@@ -238,6 +245,67 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             )}
           </button>
+
+          {/* Role Indicator / Quick Toggle */}
+          {onRoleChange && (
+            <button
+              type="button"
+              onClick={() => {
+                const nextRole: UserRole = activeRole === 'teacher' ? 'headmaster' : 'teacher';
+                onRoleChange(nextRole);
+              }}
+              className="nav-link"
+              style={{
+                background:
+                  activeRole === 'teacher'
+                    ? 'rgba(13, 91, 73, 0.14)'
+                    : 'rgba(155, 93, 229, 0.18)',
+                border:
+                  activeRole === 'teacher'
+                    ? '1px solid rgba(0, 245, 212, 0.3)'
+                    : '1px solid rgba(155, 93, 229, 0.45)',
+                padding: '6px 10px',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                borderRadius: '12px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+              title="भूमिका बदलें: शिक्षक (डिफ़ॉल्ट) अथवा प्रधानाध्यापक/Admin दृश्य"
+            >
+              <span>{activeRole === 'teacher' ? '🧑‍🏫' : '🏫'}</span>
+              <span className="hidden md:inline">
+                {activeRole === 'teacher' ? 'Teacher' : 'Head/Admin'}
+              </span>
+            </button>
+          )}
+
+          {/* Settings, DPDP Privacy & Local Backup Button */}
+          {onOpenSettings && (
+            <button
+              type="button"
+              onClick={() => onOpenSettings('general')}
+              className="nav-link"
+              style={{
+                background: 'rgba(0, 245, 212, 0.08)',
+                border: '1px solid rgba(0, 245, 212, 0.25)',
+                padding: '6px 10px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                borderRadius: '12px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+              title="सेटिंग्स, विद्यालय प्रोफ़ाइल, DPDP डेटा गोपनीयता व JSON बैकअप (Settings & Backup)"
+            >
+              <span>⚙️</span>
+              <span className="hidden lg:inline">सेटिंग्स</span>
+            </button>
+          )}
 
           <button
             className="theme-toggle"

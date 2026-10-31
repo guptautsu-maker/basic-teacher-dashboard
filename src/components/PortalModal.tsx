@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PortalApp, PortalCategory } from '../types/portalApp';
 import { PORTAL_CATEGORIES } from '../data/portalAppData';
 import {
   PASSWORD_WARNING_NOTICE,
   validateLoginHelpNote,
 } from '../utils/portalManager';
+import { validateSensitiveData } from '../utils/privacyAndSecurityManager';
+import { SensitiveDataAlert } from './SensitiveDataGuardNotice';
 
 interface PortalModalProps {
   isOpen: boolean;
@@ -29,6 +31,10 @@ export const PortalModal: React.FC<PortalModalProps> = ({
   const [lastUsedDate, setLastUsedDate] = useState('');
   const [loginHelpNote, setLoginHelpNote] = useState('');
   const [passwordWarning, setPasswordWarning] = useState<string | null>(null);
+
+  const sensitiveValidation = useMemo(() => {
+    return validateSensitiveData(`${name} ${purpose} ${neededForTask} ${loginHelpNote}`);
+  }, [name, purpose, neededForTask, loginHelpNote]);
 
   useEffect(() => {
     if (portalToEdit) {
@@ -90,7 +96,12 @@ export const PortalModal: React.FC<PortalModalProps> = ({
       return;
     }
 
-    // Explicit password security block
+    // Explicit Aadhaar & password security block (DPDP Act 2023)
+    if (!sensitiveValidation.isValid) {
+      onToast('🚨 आधार संख्या या पासवर्ड सहेजना पूर्णतः वर्जित है (DPDP Act 2023)!');
+      return;
+    }
+
     const securityCheck = validateLoginHelpNote(loginHelpNote);
     if (!securityCheck.isValid) {
       onToast('❌ पासवर्ड सहेजना वर्जित है! कृपया पासवर्ड हटाएँ।');
@@ -160,6 +171,7 @@ export const PortalModal: React.FC<PortalModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          <SensitiveDataAlert validation={sensitiveValidation} />
           {/* Portal Name */}
           <div>
             <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">

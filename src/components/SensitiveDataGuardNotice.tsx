@@ -3,15 +3,18 @@ import { SensitiveDataValidationResult, SensitiveDataViolation } from '../types/
 import { validateSensitiveData } from '../utils/privacyAndSecurityManager';
 
 interface SensitiveDataAlertProps {
-  validationResult: SensitiveDataValidationResult | null;
+  validationResult?: SensitiveDataValidationResult | null;
+  validation?: SensitiveDataValidationResult | null;
   onDismiss?: () => void;
 }
 
 export const SensitiveDataAlert: React.FC<SensitiveDataAlertProps> = ({
   validationResult,
+  validation,
   onDismiss,
 }) => {
-  if (!validationResult || validationResult.isValid) return null;
+  const result = validationResult || validation;
+  if (!result || result.isValid) return null;
 
   return (
     <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/70 border-2 border-rose-500 text-rose-900 dark:text-rose-100 shadow-md space-y-2 animate-shake">
@@ -34,7 +37,7 @@ export const SensitiveDataAlert: React.FC<SensitiveDataAlertProps> = ({
       </div>
 
       <div className="space-y-1.5 text-xs">
-        {validationResult.violations.map((violation: SensitiveDataViolation, idx: number) => (
+        {result.violations.map((violation: SensitiveDataViolation, idx: number) => (
           <div key={idx} className="p-2.5 rounded-xl bg-white/70 dark:bg-rose-900/50 border border-rose-200 dark:border-rose-800">
             <div className="font-bold text-rose-900 dark:text-rose-100 flex items-center gap-1.5">
               <span>{violation.type === 'aadhaar' ? '🆔 12-अंकीय आधार नंबर पहचाना गया:' : '🔑 पासवर्ड / क्रेडेंशियल पहचाना गया:'}</span>

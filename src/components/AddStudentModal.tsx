@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Student } from '../types/classSection';
+import { validateSensitiveData } from '../utils/privacyAndSecurityManager';
+import { SensitiveDataAlert } from './SensitiveDataGuardNotice';
 
 interface AddStudentModalProps {
   isOpen: boolean;
@@ -23,12 +25,20 @@ export const AddStudentModal: React.FC<AddStudentModalProps> = ({
   const [gender, setGender] = useState<'M' | 'F' | 'O'>(initialData?.gender || 'M');
   const [error, setError] = useState('');
 
+  const sensitiveValidation = useMemo(() => {
+    return validateSensitiveData(`${name} ${rollNumber}`);
+  }, [name, rollNumber]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setError('कृपया विद्यार्थी का नाम दर्ज करें (Student name is required)');
+      return;
+    }
+    if (!sensitiveValidation.isValid) {
+      setError('सुरक्षा रोक (DPDP Act 2023): विद्यार्थी के नाम में आधार नंबर या पासवर्ड दर्ज करना पूर्णतः वर्जित है!');
       return;
     }
     const parsedRoll = parseInt(rollNumber, 10);
@@ -67,6 +77,8 @@ export const AddStudentModal: React.FC<AddStudentModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          <SensitiveDataAlert validation={sensitiveValidation} />
+
           {error && (
             <div className="p-2.5 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-700 dark:text-rose-300">
               ⚠️ {error}
@@ -151,9 +163,14 @@ export const AddStudentModal: React.FC<AddStudentModalProps> = ({
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl">
-            🔒 <strong>गोपनीयता:</strong> केवल उपस्थिति दर्ज करने हेतु न्यूनतम सूचना रखी जाती है।
-          </p>
+          <div className="text-[11px] text-slate-600 dark:text-slate-300 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 p-2.5 rounded-xl space-y-1">
+            <p className="font-bold text-emerald-900 dark:text-emerald-200">
+              🔒 DPDP Act 2023 (धारा 6 एवं 9) डेटा न्यूनतमीकरण:
+            </p>
+            <p>
+              केवल उपस्थिति हेतु नाम, अनुक्रमांक व लिंग रखा जाता है। <strong>आधार संख्या, बैंक खाता या पासवर्ड दर्ज करना प्रतिबंधित है।</strong>
+            </p>
+          </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-2.5 pt-2">
@@ -166,7 +183,8 @@ export const AddStudentModal: React.FC<AddStudentModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-xl shadow-xs transition"
+              disabled={!sensitiveValidation.isValid}
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-xs font-semibold rounded-xl shadow-xs transition"
             >
               {initialData ? 'सहेजें' : 'जोड़ें (Save)'}
             </button>
