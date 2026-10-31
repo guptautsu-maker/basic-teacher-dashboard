@@ -46,8 +46,8 @@ export const Header: React.FC<HeaderProps> = ({
             <circle cx="32" cy="28" r="2.5" fill="#00F5D4" />
           </svg>
           <span className="header-logo-text">
-            BASIC TEACHER
-            <span className="header-logo-sub">DASHBOARD</span>
+            TEACHER HUB
+            <span className="header-logo-sub">बेसिक शिक्षक डैशबोर्ड</span>
           </span>
         </button>
 
@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
             className={`nav-link ${activePage === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActivePage('dashboard')}
           >
-            Dashboard
+            ⚡ Teacher Hub
           </button>
           <button
             type="button"

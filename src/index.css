@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* ============ COLORS & TOKENS ============ */
 :root {
   --brand: #0D5B49;

@@ -23,6 +23,7 @@ import { AddPortalModal } from '../components/AddPortalModal';
 import { AddNoticeModal } from '../components/AddNoticeModal';
 import { AddActionCardModal } from '../components/AddActionCardModal';
 import { AddWorkspaceToolModal } from '../components/AddWorkspaceToolModal';
+import { TeacherHubDashboard } from '../components/TeacherHubDashboard';
 
 const NOTE_CATEGORIES: Record<
   QuickNote['category'],
@@ -74,6 +75,9 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNavigate }) => {
+  // Main view toggle: 'teacher_hub' (default) vs 'portals'
+  const [dashboardMode, setDashboardMode] = useState<'teacher_hub' | 'portals'>('teacher_hub');
+
   // Date chip
   const [dateText, setDateText] = useState('');
   useEffect(() => {
@@ -737,10 +741,80 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
         </div>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* 1. Action Cards Section (Editable: Add / Edit / Delete / Status) */}
-      {/* ------------------------------------------------------------- */}
-      <section id="action-cards" style={{ marginBottom: '28px' }}>
+      {/* View Switcher: Teacher Hub vs Portals Directory */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          padding: '6px',
+          borderRadius: '16px',
+          background: 'var(--surface)',
+          border: '1px solid var(--glass-border)',
+          marginBottom: '24px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setDashboardMode('teacher_hub')}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: 'none',
+            fontFamily: 'var(--font-b)',
+            fontSize: '15px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.25s ease',
+            background: dashboardMode === 'teacher_hub' ? 'var(--brand)' : 'transparent',
+            color: dashboardMode === 'teacher_hub' ? '#ffffff' : 'var(--ink2)',
+            boxShadow: dashboardMode === 'teacher_hub' ? '0 4px 14px rgba(13,91,73,0.35)' : 'none',
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>⚡</span>
+          <span>मुख्य शिक्षक हब (Teacher Hub)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setDashboardMode('portals')}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: 'none',
+            fontFamily: 'var(--font-b)',
+            fontSize: '15px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.25s ease',
+            background: dashboardMode === 'portals' ? 'var(--brand)' : 'transparent',
+            color: dashboardMode === 'portals' ? '#ffffff' : 'var(--ink2)',
+            boxShadow: dashboardMode === 'portals' ? '0 4px 14px rgba(13,91,73,0.35)' : 'none',
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>📂</span>
+          <span>पोर्टल व टूल्स निर्देशिका (Portals Directory)</span>
+        </button>
+      </div>
+
+      {dashboardMode === 'teacher_hub' ? (
+        <TeacherHubDashboard onToast={onToast} currentUser={currentUser} />
+      ) : (
+        <>
+          {/* ------------------------------------------------------------- */}
+          {/* 1. Action Cards Section (Editable: Add / Edit / Delete / Status) */}
+          {/* ------------------------------------------------------------- */}
+          <section id="action-cards" style={{ marginBottom: '28px' }}>
         {renderSectionHeader('action_cards', 'एक्शन हब व ग्रुप लिंक्स', '💬', () => {
           setCardToEdit(null);
           setIsAddCardOpen(true);
@@ -1466,6 +1540,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
           </div>
         </div>
       </section>
+        </>
+      )}
 
       {/* ------------------------------------------------------------- */}
       {/* Modals for Adding / Editing and Section Notes Window */}

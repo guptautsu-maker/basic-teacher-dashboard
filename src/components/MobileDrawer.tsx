@@ -51,7 +51,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
           className={`drawer-link ${activePage === 'dashboard' ? 'active' : ''}`}
           onClick={() => handleNavigate('dashboard')}
         >
-          📊 Dashboard
+          ⚡ Teacher Hub (मुख्य डैशबोर्ड)
         </button>
         <button
           className={`drawer-link ${activePage === 'sheets' ? 'active' : ''}`}
