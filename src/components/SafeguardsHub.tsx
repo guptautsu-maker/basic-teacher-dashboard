@@ -12,6 +12,7 @@ import {
 import { GlobalSearchModal } from './GlobalSearchModal';
 import { StartOfDayModal } from './StartOfDayModal';
 import { EndOfDayModal } from './EndOfDayModal';
+import { PrintableSummaryPdfModal } from './PrintableSummaryPdfModal';
 
 interface SafeguardsHubProps {
   tasks: Task[];
@@ -44,6 +45,7 @@ export const SafeguardsHub: React.FC<SafeguardsHubProps> = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isStartOfDayOpen, setIsStartOfDayOpen] = useState(false);
   const [isEndOfDayOpen, setIsEndOfDayOpen] = useState(false);
+  const [isPrintablePdfOpen, setIsPrintablePdfOpen] = useState(false);
 
   // Tab state: 'overview' | 'critical' | 'weekly' | 'report'
   const [activeTab, setActiveTab] = useState<'overview' | 'critical' | 'weekly' | 'report'>('overview');
@@ -91,15 +93,7 @@ export const SafeguardsHub: React.FC<SafeguardsHubProps> = ({
   }, [tasks, duties, trainings, orders, criticalEscalations, currentUser]);
 
   const handlePrintReport = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(reportHtml);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    } else {
-      onToast('⚠️ कृपया पॉप-अप विंडो की अनुमति दें');
-    }
+    setIsPrintablePdfOpen(true);
   };
 
   const handleDownloadReport = () => {
@@ -723,6 +717,16 @@ export const SafeguardsHub: React.FC<SafeguardsHubProps> = ({
           onTasksUpdated={onTasksUpdated}
           onToast={onToast}
           currentUser={currentUser}
+        />
+
+        <PrintableSummaryPdfModal
+          isOpen={isPrintablePdfOpen}
+          onClose={() => setIsPrintablePdfOpen(false)}
+          tasks={tasks}
+          classes={classes}
+          duties={duties}
+          teacherName={currentUser?.name || 'सुरेश कुमार (सहायक अध्यापक)'}
+          onToast={onToast}
         />
       </div>
     </div>

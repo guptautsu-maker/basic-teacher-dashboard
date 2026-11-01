@@ -2893,6 +2893,8 @@ td.auto {
 @media print {
   .site-header,
   .mobile-drawer,
+  .app-left-sidebar,
+  .workspace-topbar,
   .toolbar,
   .summary,
   .tabs-row,
@@ -2902,18 +2904,67 @@ td.auto {
   .row-del,
   .page-head .btn,
   .page-head .hint,
-  .header-actions {
+  .header-actions,
+  .no-print {
     display: none !important;
   }
   body {
-    background: #fff;
-    color: #000;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  body[data-print-summary-active="true"] > :not(.printable-summary-modal-root) {
+    display: none !important;
+  }
+  .printable-summary-modal-root {
+    position: static !important;
+    inset: auto !important;
+    background: #fff !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  .printable-summary-dialog {
+    max-width: 100% !important;
+    max-height: none !important;
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+  .printable-summary-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  .printable-summary-sheet {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
   }
   .glass-card,
   .table-card {
-    box-shadow: none;
-    border: 1px solid #bbb;
-    background: #fff;
+    box-shadow: none !important;
+    border: 1px solid #bbb !important;
+    background: #fff !important;
+    color: #000 !important;
+    break-inside: avoid;
+  }
+  html[data-high-contrast="true"] .glass-card,
+  html[data-high-contrast="true"] .table-card,
+  .printable-summary-sheet[data-high-contrast="true"] .glass-card,
+  .printable-summary-sheet[data-high-contrast="true"] .table-card {
+    border: 1.5px solid var(--glass-border, #111111) !important;
+  }
+  .printable-summary-sheet table th,
+  .printable-summary-sheet table td {
+    border: 1px solid var(--line, #222222) !important;
+    color: #000 !important;
+    background: #fff !important;
   }
   .cell-input {
     border: none !important;
@@ -2921,6 +2972,40 @@ td.auto {
     box-shadow: none !important;
     color: #000 !important;
   }
+}
+
+/* ============ PRINTABLE SUMMARY SHEET & WCAG HIGH CONTRAST ============ */
+.printable-summary-sheet {
+  --ink: #13231C;
+  --ink2: #2C3E35;
+  --line: #94A39B;
+  --glass-border: #CBD5CF;
+  background: #ffffff;
+  color: var(--ink);
+}
+
+html[data-high-contrast="true"] .printable-summary-sheet,
+.printable-summary-sheet[data-high-contrast="true"] {
+  --ink: #000000;
+  --ink2: #111111;
+  --line: #222222;
+  --glass-border: #111111;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.printable-summary-sheet .glass-card,
+.printable-summary-sheet .table-card {
+  background: #ffffff;
+  color: var(--ink);
+  border: 1.5px solid var(--glass-border);
+  box-shadow: none;
+}
+
+.printable-summary-sheet table.table-card th,
+.printable-summary-sheet table.table-card td {
+  border: 1px solid var(--line);
+  color: var(--ink);
 }
 
 /* ============ WCAG ACCESSIBILITY: HIGH CONTRAST & REDUCE MOTION ============ */
@@ -2946,4 +3031,5 @@ html[data-reduce-motion="true"] *::after {
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
 

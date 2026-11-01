@@ -267,31 +267,58 @@ export const getDefaultAppSettings = (): AppSettings => {
     },
     dataPrivacyAccepted: true,
     lastBackupDate: null,
+    cloudSyncEnabled: false,
+    cloudSync: {
+      enabled: false,
+      autoSyncOnChange: true,
+      conflictPolicy: 'merge',
+      deviceId: 'th-web-primary',
+      deviceName: 'Primary Teacher Workspace (Web)',
+      syncChannelKey: 'up-bsp-09120104501',
+      lastSyncedAt: null,
+      lastSyncRevision: null,
+      lastSyncStatus: 'idle',
+    },
   };
 };
 
 export const getStoredAppSettings = (): AppSettings => {
+  const defaults = getDefaultAppSettings();
   try {
     const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
     if (saved) {
       const parsed = JSON.parse(saved);
+      const resolvedCloudSyncEnabled =
+        typeof parsed.cloudSyncEnabled === 'boolean'
+          ? parsed.cloudSyncEnabled
+          : Boolean(parsed.cloudSync?.enabled);
       return {
-        ...getDefaultAppSettings(),
+        ...defaults,
         ...parsed,
+        cloudSyncEnabled: resolvedCloudSyncEnabled,
         schoolProfile: {
-          ...getDefaultAppSettings().schoolProfile,
+          ...defaults.schoolProfile,
           ...(parsed.schoolProfile || {}),
         },
         notifications: {
-          ...getDefaultAppSettings().notifications,
+          ...defaults.notifications,
           ...(parsed.notifications || {}),
+          leadTimes: {
+            ...defaults.notifications.leadTimes,
+            ...(parsed.notifications?.leadTimes || {}),
+          },
+        },
+        cloudSync: {
+          ...defaults.cloudSync!,
+          ...(parsed.cloudSync || {}),
+          enabled: resolvedCloudSyncEnabled,
         },
       };
     }
   } catch {
     // ignore
   }
-  return getDefaultAppSettings();
+  return defaults;
 };
 
 export const saveStoredAppSettings = (settings: AppSettings): void => {

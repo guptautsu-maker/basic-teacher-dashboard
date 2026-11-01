@@ -33,6 +33,46 @@ export interface NotificationPreferences {
   quietHoursEnd: string; // "07:00"
 }
 
+export type CloudSyncConflictPolicy = 'latest_wins' | 'merge';
+
+export type CloudSyncStateStatus = 'idle' | 'syncing' | 'synced' | 'offline_queued';
+
+export interface CloudSyncPreferences {
+  enabled: boolean;
+  autoSyncOnChange: boolean;
+  conflictPolicy: CloudSyncConflictPolicy;
+  deviceId: string;
+  deviceName: string;
+  syncChannelKey: string;
+  lastSyncedAt?: string | null;
+  lastSyncRevision?: string | null;
+  lastSyncStatus?: CloudSyncStateStatus;
+  syncedItemCounts?: {
+    tasks: number;
+    duties: number;
+    meetings: number;
+    trainings: number;
+    govtOrders: number;
+    portals: number;
+    classSections: number;
+    attendanceRecords: number;
+  };
+}
+
+export interface CloudSyncEnvelope {
+  syncKey: string;
+  revisionHash: string;
+  syncedAt: string;
+  deviceId: string;
+  deviceName: string;
+  academicYear: string;
+  schoolName: string;
+  teacherName: string;
+  redactedSensitiveFields: number;
+  itemCounts: TeacherHubBackupMetadata['itemCounts'];
+  bundle: TeacherHubBackupData;
+}
+
 export interface AppSettings {
   language: AppLanguage;
   activeAcademicYear: string; // e.g. "2026-27"
@@ -41,6 +81,8 @@ export interface AppSettings {
   role: UserRole;
   dataPrivacyAccepted: boolean;
   lastBackupDate?: string | null;
+  cloudSyncEnabled?: boolean;
+  cloudSync?: CloudSyncPreferences;
 }
 
 export interface DPDPPrinciple {

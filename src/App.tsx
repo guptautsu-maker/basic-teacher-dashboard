@@ -41,7 +41,12 @@ import { AppSettings, UserRole } from './types/settingsAndPrivacy';
 import {
   getStoredAppSettings,
   saveStoredAppSettings,
+  restoreBackupBundle,
 } from './utils/privacyAndSecurityManager';
+import {
+  CLOUD_SYNC_BROADCAST_CHANNEL,
+  syncLocalDataToCloud,
+} from './utils/cloudSyncManager';
 import {
   ThemeMode,
   getBrowserInitialTheme,
@@ -402,10 +407,58 @@ export const App: React.FC = () => {
     setTasks(updatedTasks);
     try {
       localStorage.setItem('th-tasks', JSON.stringify(updatedTasks));
+      window.dispatchEvent(new CustomEvent('th-local-data-mutated', { detail: { key: 'th-tasks' } }));
     } catch {
       // ignore
     }
   };
+
+  // Automatic Multi-Device Cloud Sync Watcher when Cloud Sync is enabled in Settings
+  useEffect(() => {
+    const isSyncEnabled = Boolean(
+      appSettings.cloudSyncEnabled ?? appSettings.cloudSync?.enabled
+    );
+    if (!isSyncEnabled) return;
+
+    let debounceTimer: any = null;
+    const handleLocalMutation = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        syncLocalDataToCloud().catch(() => {
+          // ignore background sync errors
+        });
+      }, 250);
+    };
+
+    window.addEventListener('th-local-data-mutated', handleLocalMutation);
+
+    let bc: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        bc = new BroadcastChannel(CLOUD_SYNC_BROADCAST_CHANNEL);
+        bc.onmessage = (event) => {
+          if (event.data?.type === 'CLOUD_SYNC_PUSH' && event.data?.envelope?.bundle) {
+            restoreBackupBundle(event.data.envelope.bundle, 'merge');
+            refreshAllData();
+          }
+        };
+      } catch {
+        // ignore
+      }
+    }
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      window.removeEventListener('th-local-data-mutated', handleLocalMutation);
+      if (bc) {
+        try {
+          bc.close();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, [appSettings.cloudSyncEnabled, appSettings.cloudSync?.enabled]);
 
   const handleQuickEnterWorkspace = () => {
     if (!currentUser) {

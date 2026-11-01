@@ -17,6 +17,9 @@ import {
 import { AddClassSectionModal } from './AddClassSectionModal';
 import { AddStudentModal } from './AddStudentModal';
 import { CsvImportExportModal } from './CsvImportExportModal';
+import { PrintableSummaryPdfModal } from './PrintableSummaryPdfModal';
+import { getInitialTeacherHubTasks } from '../data/teacherHubSampleData';
+import { Task } from '../utils/taskStatusSystem';
 
 interface MyClassesManagerProps {
   onToast: (msg: string) => void;
@@ -106,6 +109,20 @@ export const MyClassesManager: React.FC<MyClassesManagerProps> = ({
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
 
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
+  const [isPrintablePdfOpen, setIsPrintablePdfOpen] = useState(false);
+
+  const storedTasks = useMemo<Task[]>(() => {
+    try {
+      const raw = localStorage.getItem('th-tasks');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return getInitialTeacherHubTasks();
+  }, [isPrintablePdfOpen]);
 
   // Current day attendance record for active class
   const currentDailyRecord = useMemo(() => {
@@ -380,6 +397,15 @@ export const MyClassesManager: React.FC<MyClassesManagerProps> = ({
               >
                 <span>🔄</span>
                 <span>सत्र परिवर्तन (Rollover)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPrintablePdfOpen(true)}
+                className="px-3.5 py-2.5 rounded-xl bg-white text-teal-950 hover:bg-teal-50 font-bold text-xs shadow-md transition flex items-center gap-1.5"
+                title="कार्य एवं कक्षा डेटा का उच्च-कंट्रास्ट पीडीएफ सारांश प्रिंट करें"
+              >
+                <span>📄</span>
+                <span>पीडीएफ सारांश (Print PDF)</span>
               </button>
               <button
                 onClick={() => {
@@ -965,6 +991,17 @@ export const MyClassesManager: React.FC<MyClassesManagerProps> = ({
           onToast={onToast}
         />
       )}
+
+      {/* Printable Tasks & Class Data Summary PDF Modal */}
+      <PrintableSummaryPdfModal
+        isOpen={isPrintablePdfOpen}
+        onClose={() => setIsPrintablePdfOpen(false)}
+        tasks={storedTasks}
+        classes={classSections}
+        attendanceRecords={attendanceRecords}
+        teacherName={currentUser?.name || 'सुरेश कुमार (सहायक अध्यापक)'}
+        onToast={onToast}
+      />
     </div>
   );
 };

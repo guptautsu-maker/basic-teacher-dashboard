@@ -5,6 +5,7 @@ import {
   UserRole,
   BackupValidationResult,
   TeacherHubBackupData,
+  CloudSyncConflictPolicy,
 } from '../types/settingsAndPrivacy';
 import {
   getDPDPAuditNotice,
@@ -12,6 +13,11 @@ import {
   validateBackupData,
   restoreBackupBundle,
 } from '../utils/privacyAndSecurityManager';
+import {
+  toggleCloudSyncInSettings,
+  syncLocalDataToCloud,
+  pullCloudDataToLocal,
+} from '../utils/cloudSyncManager';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -45,16 +51,66 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   }, [isOpen, initialTab, settings]);
 
-  // Backup restore state
+  // Backup restore & Cloud Sync state
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importData, setImportData] = useState<TeacherHubBackupData | null>(null);
   const [validationResult, setValidationResult] = useState<BackupValidationResult | null>(null);
   const [restoreMode, setRestoreMode] = useState<'replace' | 'merge'>('replace');
+  const [isSyncingCloud, setIsSyncingCloud] = useState<boolean>(false);
 
   // Privacy notice data
   const dpdpNotice = getDPDPAuditNotice();
 
   if (!isOpen) return null;
+
+  const isCloudSyncActive = Boolean(
+    formSettings.cloudSyncEnabled ?? formSettings.cloudSync?.enabled
+  );
+
+  const handleToggleCloudSync = async (enabled: boolean) => {
+    const nextSettings = toggleCloudSyncInSettings(formSettings, enabled);
+    setFormSettings(nextSettings);
+    onUpdateSettings(nextSettings);
+
+    if (enabled) {
+      setIsSyncingCloud(true);
+      try {
+        const res = await syncLocalDataToCloud(nextSettings);
+        setFormSettings(res.updatedSettings);
+        onUpdateSettings(res.updatedSettings);
+        onToast(res.messageHi);
+      } finally {
+        setIsSyncingCloud(false);
+      }
+    } else {
+      onToast('🔒 क्लाउड सिंक निष्क्रिय किया गया (Local-Only Mode Active)');
+    }
+  };
+
+  const handleManualCloudSyncPush = async () => {
+    setIsSyncingCloud(true);
+    try {
+      const res = await syncLocalDataToCloud(formSettings);
+      setFormSettings(res.updatedSettings);
+      onUpdateSettings(res.updatedSettings);
+      onToast(res.messageHi);
+    } finally {
+      setIsSyncingCloud(false);
+    }
+  };
+
+  const handleManualCloudSyncPull = async () => {
+    setIsSyncingCloud(true);
+    try {
+      const policy: CloudSyncConflictPolicy =
+        formSettings.cloudSync?.conflictPolicy || 'merge';
+      const res = await pullCloudDataToLocal(policy);
+      if (onDataRestored) onDataRestored();
+      onToast(res.messageHi);
+    } finally {
+      setIsSyncingCloud(false);
+    }
+  };
 
   const handleSaveSettings = () => {
     onUpdateSettings(formSettings);
@@ -227,8 +283,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
             }`}
           >
-            <span>💾</span>
-            <span>बैकअप व रिस्टोर</span>
+            <span>☁️</span>
+            <span>क्लाउड सिंक व बैकअप</span>
           </button>
         </div>
 
@@ -298,6 +354,103 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   वर्तमान में सभी उपस्थिति, कार्य व अभिलेख सत्र <strong>{formSettings.activeAcademicYear}</strong> में सुरक्षित हो रहे हैं।
                 </p>
+              </div>
+
+              {/* Quick Cloud Sync Toggle in General Tab */}
+              <div
+                data-testid="settings-cloud-sync-card"
+                className="p-4 sm:p-5 rounded-2xl border border-teal-300 dark:border-teal-800 bg-gradient-to-r from-teal-50/80 to-emerald-50/70 dark:from-[#122620] dark:to-[#152d25] space-y-3"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">☁️</span>
+                      <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 m-0">
+                        क्लाउड सिंक / Cloud Sync (Multi-Device Auto-Sync)
+                      </h3>
+                      <span
+                        data-testid="cloud-sync-status-badge"
+                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md ${
+                          isCloudSyncActive
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        {isSyncingCloud
+                          ? 'सिंक हो रहा है... (Syncing...)'
+                          : isCloudSyncActive
+                          ? 'सक्रिय (Auto-Sync On)'
+                          : 'निष्क्रिय (Local Only)'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 m-0">
+                      सक्रिय करने पर आपके लोकल JSON डेटा (कार्य, कक्षाएं, उपस्थिति, शासनादेश व प्रशिक्षण) में होने वाला प्रत्येक बदलाव स्वतः मल्टी-डिवाइस क्लाउड के साथ सिंक होता रहेगा।
+                    </p>
+                  </div>
+
+                  <label className="inline-flex items-center gap-2.5 cursor-pointer shrink-0 select-none">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      aria-label="Cloud Sync (क्लाउड सिंक - Multi-Device Sync)"
+                      data-testid="cloud-sync-toggle"
+                      checked={isCloudSyncActive}
+                      onChange={(e) => handleToggleCloudSync(e.target.checked)}
+                      className="w-5 h-5 rounded text-[#0D5B49] accent-[#0D5B49] cursor-pointer"
+                    />
+                    <span className="text-xs sm:text-sm font-bold text-[#0D5B49] dark:text-[#00F5D4]">
+                      {isCloudSyncActive ? 'Cloud Sync सक्रिय' : 'Cloud Sync चालू करें'}
+                    </span>
+                  </label>
+                </div>
+
+                {isCloudSyncActive && (
+                  <div className="pt-2 border-t border-teal-200/70 dark:border-teal-800/70 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-300">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span>
+                        अंतिम सिंक:{' '}
+                        <strong data-testid="cloud-sync-last-time">
+                          {formSettings.cloudSync?.lastSyncedAt
+                            ? new Date(formSettings.cloudSync.lastSyncedAt).toLocaleTimeString('hi-IN')
+                            : 'अभी सिंक हुआ'}
+                        </strong>
+                      </span>
+                      {formSettings.cloudSync?.lastSyncRevision && (
+                        <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-white/80 dark:bg-black/30 border border-teal-200 dark:border-teal-800">
+                          {formSettings.cloudSync.lastSyncRevision}
+                        </span>
+                      )}
+                      {formSettings.cloudSync?.syncedItemCounts && (
+                        <span>
+                          सिंक रिकॉर्ड्स:{' '}
+                          <strong>
+                            {formSettings.cloudSync.syncedItemCounts.tasks} कार्य •{' '}
+                            {formSettings.cloudSync.syncedItemCounts.classSections} कक्षाएं
+                          </strong>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        data-testid="cloud-sync-now-btn"
+                        disabled={isSyncingCloud}
+                        onClick={handleManualCloudSyncPush}
+                        className="px-3 py-1.5 rounded-lg bg-[#0D5B49] hover:bg-[#0A4739] text-white font-bold text-xs transition-all cursor-pointer"
+                      >
+                        🔄 अभी सिंक करें (Sync Now)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('backup')}
+                        className="px-3 py-1.5 rounded-lg border border-[#0D5B49]/30 dark:border-[#00F5D4]/30 text-[#0D5B49] dark:text-[#00F5D4] font-bold text-xs hover:bg-white/60 dark:hover:bg-black/20 transition-all cursor-pointer"
+                      >
+                        विस्तृत सिंक विकल्प →
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -670,9 +823,138 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
 
-          {/* TAB 5: LOCAL BACKUP & RESTORE */}
+          {/* TAB 5: CLOUD SYNC & LOCAL BACKUP / RESTORE */}
           {activeTab === 'backup' && (
             <div className="space-y-6 animate-fadeIn">
+              {/* Multi-Device Cloud Sync Control Box */}
+              <div className="p-4 sm:p-5 rounded-2xl border-2 border-teal-500/40 dark:border-teal-400/30 bg-gradient-to-br from-teal-50/80 via-emerald-50/50 to-white dark:from-[#122620] dark:via-[#152a22] dark:to-[#16251E] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 font-black text-sm sm:text-base text-slate-900 dark:text-slate-100">
+                      <span>☁️</span>
+                      <span>मल्टी-डिवाइस क्लाउड सिंक (Automatic Cloud Sync)</span>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl">
+                      मोबाइल, टैबलेट और विद्यालय कंप्यूटर के बीच अपने सभी दैनिक कार्य, कक्षाएं, उपस्थिति व शासनादेश स्वतः सिंक रखें। DPDP Act 2023 सुरक्षा के अंतर्गत संवेदनशील डेटा सिंक से पूर्व स्वतः फ़िल्टर किया जाता है।
+                    </p>
+                  </div>
+
+                  <label className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white dark:bg-[#111C17] border border-teal-300 dark:border-teal-700 cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      aria-label="Enable Automatic Cloud Sync"
+                      data-testid="backup-tab-cloud-sync-toggle"
+                      checked={isCloudSyncActive}
+                      onChange={(e) => handleToggleCloudSync(e.target.checked)}
+                      className="w-5 h-5 rounded text-[#0D5B49] accent-[#0D5B49] cursor-pointer"
+                    />
+                    <span className="text-xs sm:text-sm font-bold text-[#0D5B49] dark:text-[#00F5D4]">
+                      {isCloudSyncActive ? 'Auto-Sync ON' : 'Auto-Sync OFF'}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Multi-Device Sync Details & Actions */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-white/90 dark:bg-[#111C17] border border-gray-200 dark:border-gray-800">
+                    <div className="text-slate-500 dark:text-slate-400">सिंक स्थिति / Status</div>
+                    <div className="font-bold text-slate-900 dark:text-slate-100 mt-0.5 flex items-center gap-1.5">
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          isCloudSyncActive ? 'bg-emerald-500' : 'bg-gray-400'
+                        }`}
+                      />
+                      <span>
+                        {isSyncingCloud
+                          ? 'सिंक जारी है...'
+                          : isCloudSyncActive
+                          ? 'क्लाउड से जुड़ा हुआ (Synced)'
+                          : 'केवल लोकल स्टोरेज'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-white/90 dark:bg-[#111C17] border border-gray-200 dark:border-gray-800">
+                    <div className="text-slate-500 dark:text-slate-400">UDISE सिंक चैनल / Channel</div>
+                    <div className="font-mono font-bold text-[#0D5B49] dark:text-[#00F5D4] mt-0.5">
+                      up-bsp-{formSettings.schoolProfile.udiseCode || '09120104501'}
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-white/90 dark:bg-[#111C17] border border-gray-200 dark:border-gray-800">
+                    <div className="text-slate-500 dark:text-slate-400">अंतिम सिंक रिवीजन / Revision</div>
+                    <div className="font-mono font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+                      {formSettings.cloudSync?.lastSyncRevision || 'rev-initial'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-3 text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      मल्टी-डिवाइस मर्ज नियम:
+                    </span>
+                    <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="cloudConflictPolicy"
+                        checked={(formSettings.cloudSync?.conflictPolicy || 'merge') === 'merge'}
+                        onChange={() =>
+                          setFormSettings((prev) => ({
+                            ...prev,
+                            cloudSync: {
+                              ...prev.cloudSync!,
+                              conflictPolicy: 'merge',
+                            },
+                          }))
+                        }
+                        className="accent-[#0D5B49]"
+                      />
+                      <span>सुरक्षित मर्ज (Smart Merge)</span>
+                    </label>
+                    <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="cloudConflictPolicy"
+                        checked={formSettings.cloudSync?.conflictPolicy === 'latest_wins'}
+                        onChange={() =>
+                          setFormSettings((prev) => ({
+                            ...prev,
+                            cloudSync: {
+                              ...prev.cloudSync!,
+                              conflictPolicy: 'latest_wins',
+                            },
+                          }))
+                        }
+                        className="accent-[#0D5B49]"
+                      />
+                      <span>नवीनतम प्राथमिकता (Latest Wins)</span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isSyncingCloud}
+                      onClick={handleManualCloudSyncPush}
+                      className="py-2 px-3.5 rounded-xl bg-[#0D5B49] hover:bg-[#0A4739] text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                    >
+                      ☁️ अभी पुश सिंक करें (Push Local State)
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="cloud-sync-pull-btn"
+                      disabled={isSyncingCloud}
+                      onClick={handleManualCloudSyncPull}
+                      className="py-2 px-3.5 rounded-xl border border-[#0D5B49] dark:border-[#00F5D4] text-[#0D5B49] dark:text-[#00F5D4] hover:bg-[#0D5B49]/10 font-bold text-xs transition-all cursor-pointer"
+                    >
+                      📲 क्लाउड से पुल करें (Pull Multi-Device State)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Export Box */}
               <div className="p-4 sm:p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
@@ -816,7 +1098,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* Footer Action Buttons */}
         <div className="p-4 sm:p-5 bg-gray-50 dark:bg-[#111C17] border-t border-gray-200 dark:border-gray-800 flex items-center justify-between shrink-0">
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            🔒 समस्त डेटा केवल आपके व्यक्तिगत ब्राउज़र में सुरक्षित रहता है।
+            {isCloudSyncActive
+              ? '☁️ मल्टी-डिवाइस क्लाउड सिंक सक्रिय है (Auto-Sync to Cloud Enabled)'
+              : '🔒 समस्त डेटा केवल आपके व्यक्तिगत ब्राउज़र में सुरक्षित रहता है।'}
           </div>
 
           <div className="flex items-center gap-2.5">

@@ -50,6 +50,7 @@ import {
   getStoredAccessibilityPreferences,
   applyAccessibilityPreferencesToDom,
 } from '../utils/demoAndQaManager';
+import { PrintableSummaryPdfModal } from './PrintableSummaryPdfModal';
 
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
@@ -181,11 +182,12 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
     };
   }, []);
 
-  // Save changes
+  // Save changes & notify automatic Cloud Sync watcher
   const saveTasks = (newTasks: Task[]) => {
     setTasks(newTasks);
     try {
       localStorage.setItem('th-tasks', JSON.stringify(newTasks));
+      window.dispatchEvent(new CustomEvent('th-local-data-mutated', { detail: { key: 'th-tasks' } }));
     } catch {
       // ignore
     }
@@ -195,6 +197,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
     setMeetings(newMeetings);
     try {
       localStorage.setItem('th-meetings', JSON.stringify(newMeetings));
+      window.dispatchEvent(new CustomEvent('th-local-data-mutated', { detail: { key: 'th-meetings' } }));
     } catch {
       // ignore
     }
@@ -204,6 +207,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
     setTrainings(newTrainings);
     try {
       localStorage.setItem('th-trainings', JSON.stringify(newTrainings));
+      window.dispatchEvent(new CustomEvent('th-local-data-mutated', { detail: { key: 'th-trainings' } }));
     } catch {
       // ignore
     }
@@ -213,6 +217,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
     setGovtOrders(newOrders);
     try {
       localStorage.setItem('th-govt-orders', JSON.stringify(newOrders));
+      window.dispatchEvent(new CustomEvent('th-local-data-mutated', { detail: { key: 'th-govt-orders' } }));
     } catch {
       // ignore
     }
@@ -274,6 +279,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   // Demo Teacher Profile, QA Test Checklist & Accessibility Hub Modal State
   const [isDemoQaOpen, setIsDemoQaOpen] = useState(false);
   const [demoQaTab, setDemoQaTab] = useState<'demo' | 'qa' | 'a11y' | 'readme'>('demo');
+  const [isPrintablePdfOpen, setIsPrintablePdfOpen] = useState(false);
 
   useEffect(() => {
     applyAccessibilityPreferencesToDom(getStoredAccessibilityPreferences());
@@ -319,28 +325,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   }, [tasks]);
 
   const handlePrintPendingReport = () => {
-    const html = generatePendingWorkReportHtml({
-      generatedAt: new Date().toISOString(),
-      schoolName: 'प्राथमिक विद्यालय / Basic Parishadiya Vidyalaya',
-      teacherName: currentUser?.name || 'शिक्षक जी (Primary Teacher)',
-      academicYear: '2024-25',
-      criticalTasks: criticalEscalations,
-      highPriorityPendingTasks: tasks.filter((t) => t.status !== 'done' && (t.priority === 'urgent' || t.priority === 'high')),
-      allPendingTasks: tasks.filter((t) => t.status !== 'done'),
-      pendingDuties: duties.filter((d) => d.status === 'active'),
-      trainingsNearingDeadline: trainings.filter((tr) => tr.status !== 'completed'),
-      unreadGovtOrders: govtOrders.filter((o) => !o.isRead),
-    });
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
-      onToast('📄 लंबित कार्य रिपोर्ट तैयार की गई');
-    }
+    setIsPrintablePdfOpen(true);
   };
 
   // Task status transition
@@ -761,11 +746,12 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             </button>
           )}
           <button
+            id="open-printable-summary-pdf-btn"
             type="button"
             onClick={handlePrintPendingReport}
-            className="text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-white font-medium"
+            className="text-[#0D5B49] dark:text-[#00F5D4] hover:text-[#13231C] dark:hover:text-white font-semibold"
           >
-            📄 पीडीएफ रिपोर्ट
+            📄 पीडीएफ रिपोर्ट (Tasks &amp; Classes PDF)
           </button>
           <button
             type="button"
@@ -1411,10 +1397,10 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
               className="p-4 rounded-xl bg-white dark:bg-[#16231D] border border-[#D3DDD6] dark:border-[#2B3C34] hover:border-[#0D5B49] text-left transition-colors"
             >
               <div className="font-semibold text-sm text-[#13231C] dark:text-[#E7F0EA]">
-                3. लंबित कार्य पीडीएफ रिपोर्ट (PDF Report)
+                3. कार्य व कक्षा सारांश पीडीएफ रिपोर्ट (Summary PDF)
               </div>
               <p className="text-xs text-[#52645B] dark:text-[#9DB0A5] mt-1">
-                निरीक्षण हेतु पेंडिंग कार्यों की प्रिंट रिपोर्ट तैयार करें
+                वर्तमान कार्य एवं कक्षा डेटा को उच्च-कंट्रास्ट पीडीएफ में प्रिंट/निर्यात करें
               </p>
             </button>
 
@@ -1574,6 +1560,22 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
           setAppSettings(dataset.settings);
           window.dispatchEvent(new Event('storage'));
         }}
+        onToast={onToast}
+      />
+
+      {/* Printable Tasks & Class Data Summary PDF Modal */}
+      <PrintableSummaryPdfModal
+        isOpen={isPrintablePdfOpen}
+        onClose={() => setIsPrintablePdfOpen(false)}
+        tasks={tasks}
+        classes={classes}
+        duties={duties}
+        schoolName={appSettings.schoolProfile.schoolName}
+        udiseCode={appSettings.schoolProfile.udiseCode}
+        teacherName={currentUser?.name || 'सुरेश कुमार (सहायक अध्यापक)'}
+        academicYear={appSettings.activeAcademicYear}
+        initialCategoryFilter={activeFilterCategory}
+        initialStatusFilter={activeFilterStatus}
         onToast={onToast}
       />
     </div>

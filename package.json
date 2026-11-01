@@ -4,25 +4,36 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 3000",
+    "dev": "tsx server.ts",
+    "start": "node server.ts",
     "build": "tsc && vite build",
     "lint": "tsc --noEmit",
-    "test": "tsx --test src/utils/taskStatusSystem.test.ts src/utils/portalManager.test.ts src/utils/govtOrdersManager.test.ts src/utils/meetingsManager.test.ts src/utils/trainingsAndDutiesManager.test.ts src/utils/reminderService.test.ts src/utils/myClassesManager.test.ts src/utils/sessionRolloverManager.test.ts src/utils/safeguardsManager.test.ts src/utils/privacyAndSecurityManager.test.ts src/utils/demoAndQaManager.test.ts",
+    "test": "tsx --test src/utils/taskStatusSystem.test.ts src/utils/portalManager.test.ts src/utils/govtOrdersManager.test.ts src/utils/meetingsManager.test.ts src/utils/trainingsAndDutiesManager.test.ts src/utils/reminderService.test.ts src/utils/myClassesManager.test.ts src/utils/sessionRolloverManager.test.ts src/utils/safeguardsManager.test.ts src/utils/privacyAndSecurityManager.test.ts src/utils/demoAndQaManager.test.ts src/utils/printableSummaryPdf.test.ts src/utils/cloudSyncManager.test.ts",
     "preview": "vite preview --host 0.0.0.0 --port 3000"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.48.1",
+    "dotenv": "^18.0.9",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.3.0",
+    "firebase": "^13.1.0",
+    "firebase-admin": "^14.5.0",
     "lucide-react": "^0.475.0",
+    "pg": "^8.23.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
+    "drizzle-kit": "^0.31.11",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
     "vite": "^6.1.0"
   }
