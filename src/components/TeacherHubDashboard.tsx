@@ -539,7 +539,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             <button
               type="button"
               onClick={() => setIsStartOfDayOpen(true)}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs sm:text-sm transition-colors min-h-[40px]"
+              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs sm:text-sm transition-colors min-h-[40px]"
               title="दैनिक आरंभ चेकलिस्ट (Start of Day)"
             >
               सुबह की चेकलिस्ट
@@ -548,7 +548,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             <button
               type="button"
               onClick={() => setIsEndOfDayOpen(true)}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs sm:text-sm transition-colors min-h-[40px]"
+              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs sm:text-sm transition-colors min-h-[40px]"
               title="शाम की कार्य समीक्षा (End of Day Review)"
             >
               शाम की समीक्षा
@@ -625,8 +625,8 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             }}
             className={`p-4 rounded-xl border text-left transition-colors ${
               activeFilterStatus === 'not_started'
-                ? 'border-[#0D5B49] bg-[#F1F5F2] dark:bg-[#1E2E26]'
-                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#F8FAF9]'
+                ? 'border-[#0D5B49] dark:border-[#00F5D4] bg-[#F1F5F2] dark:bg-[#1E2E26]'
+                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#F8FAF9] dark:hover:bg-[#1E2E26]'
             }`}
           >
             <div className="text-xs text-[#52645B] dark:text-[#9DB0A5]">शुरू नहीं (Not Started)</div>
@@ -643,8 +643,8 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             }}
             className={`p-4 rounded-xl border text-left transition-colors ${
               activeFilterStatus === 'in_progress'
-                ? 'border-[#0D5B49] bg-[#F1F5F2] dark:bg-[#1E2E26]'
-                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#F8FAF9]'
+                ? 'border-[#0D5B49] dark:border-[#00F5D4] bg-[#F1F5F2] dark:bg-[#1E2E26]'
+                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#F8FAF9] dark:hover:bg-[#1E2E26]'
             }`}
           >
             <div className="text-xs text-[#52645B] dark:text-[#9DB0A5]">प्रगति पर (In Progress)</div>
@@ -662,7 +662,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             className={`p-4 rounded-xl border text-left transition-colors ${
               activeFilterStatus === 'overdue'
                 ? 'border-rose-600 bg-rose-50 dark:bg-rose-950/40'
-                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-rose-50/40'
+                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-rose-50/40 dark:hover:bg-rose-950/30'
             }`}
           >
             <div className="text-xs text-rose-700 dark:text-rose-300 font-medium">
@@ -681,8 +681,8 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             }}
             className={`p-4 rounded-xl border text-left transition-colors ${
               activeFilterStatus === 'done'
-                ? 'border-[#0D5B49] bg-[#F1F5F2] dark:bg-[#1E2E26]'
-                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#F8FAF9]'
+                ? 'border-[#0D5B49] dark:border-[#00F5D4] bg-[#F1F5F2] dark:bg-[#1E2E26]'
+                : 'border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#F8FAF9] dark:hover:bg-[#1E2E26]'
             }`}
           >
             <div className="text-xs text-[#52645B] dark:text-[#9DB0A5]">पूर्ण (Done)</div>
@@ -704,7 +704,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             className={`px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-colors ${
               activeSectionTab === 'today'
                 ? 'bg-white dark:bg-[#16231D] text-[#13231C] dark:text-[#E7F0EA] shadow-xs'
-                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
             आज व लंबित कार्य ({todayTasks.length + overdueTasks.length})
@@ -716,7 +716,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             className={`px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-colors ${
               activeSectionTab === 'upcoming'
                 ? 'bg-white dark:bg-[#16231D] text-[#13231C] dark:text-[#E7F0EA] shadow-xs'
-                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
             आगामी 7 दिन (7-Day Plan)
@@ -728,7 +728,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             className={`px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-colors ${
               activeSectionTab === 'orders'
                 ? 'bg-white dark:bg-[#16231D] text-[#13231C] dark:text-[#E7F0EA] shadow-xs'
-                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
             शासनादेश ({unreadGovtOrdersCount} अपठित)
@@ -740,7 +740,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             className={`px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-colors ${
               activeSectionTab === 'tools'
                 ? 'bg-white dark:bg-[#16231D] text-[#13231C] dark:text-[#E7F0EA] shadow-xs'
-                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+                : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
             समीक्षा, बैकअप व रिपोर्ट
@@ -796,7 +796,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                 activeFilterCategory === 'all'
                   ? 'bg-[#0D5B49] text-white'
-                  : 'bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+                  : 'bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34]'
               }`}
             >
               सभी श्रेणियाँ (All · {categoryCounts.all})
@@ -813,7 +813,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                     isSelected
                       ? 'bg-[#0D5B49] text-white'
-                      : 'bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] hover:bg-[#E6EDE8]'
+                      : 'bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34]'
                   }`}
                 >
                   <span aria-hidden="true">{meta.icon}</span>
@@ -913,7 +913,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                             href={task.portalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-xs font-medium hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26]"
+                            className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] text-xs font-medium hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34]"
                           >
                             पोर्टल ↗
                           </a>
@@ -922,7 +922,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                         <button
                           type="button"
                           onClick={() => handleStatusChange(task, 'in_progress')}
-                          className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-xs font-medium hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26]"
+                          className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] text-xs font-medium hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34]"
                         >
                           प्रगति पर
                         </button>
@@ -1016,7 +1016,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                           href={meet.locationOrLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-xs font-medium"
+                          className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26] text-xs font-medium"
                         >
                           लिंक खोलें ↗
                         </a>
@@ -1030,7 +1030,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                           saveMeetings(updated);
                           onToast('बैठक संपन्न दर्ज की गई');
                         }}
-                        className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] hover:bg-[#F1F5F2] text-xs font-semibold"
+                        className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26] text-xs font-semibold"
                       >
                         ✓ संपन्न
                       </button>
@@ -1080,7 +1080,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                         <h4
                           className={`font-semibold text-sm sm:text-base ${
                             isCompleted
-                              ? 'line-through text-[#52645B]'
+                              ? 'line-through text-[#52645B] dark:text-[#9DB0A5]'
                               : 'text-[#13231C] dark:text-[#E7F0EA]'
                           }`}
                         >
@@ -1100,7 +1100,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                             href={task.portalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-xs font-medium hover:bg-[#F1F5F2]"
+                            className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] text-xs font-medium hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26]"
                           >
                             पोर्टल ↗
                           </a>
@@ -1126,7 +1126,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                           }
                           className={`py-2 px-3.5 rounded-lg font-semibold text-xs transition-colors ${
                             isCompleted
-                              ? 'border border-[#D3DDD6] dark:border-[#2B3C34] text-[#52645B]'
+                              ? 'border border-[#D3DDD6] dark:border-[#2B3C34] text-[#52645B] dark:text-[#9DB0A5] hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26]'
                               : 'bg-[#0D5B49] hover:bg-[#094537] text-white'
                           }`}
                         >
@@ -1162,7 +1162,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 className={`px-3 py-1 rounded-md text-xs font-semibold ${
                   timelineDayOffset === 'all'
                     ? 'bg-[#0D5B49] text-white'
-                    : 'bg-white dark:bg-[#1E2E26] text-[#52645B] border border-[#D3DDD6] dark:border-[#2B3C34]'
+                    : 'bg-white dark:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] border border-[#D3DDD6] dark:border-[#2B3C34]'
                 }`}
               >
                 सभी 7 दिन
@@ -1175,7 +1175,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                   className={`px-2.5 py-1 rounded-md text-xs font-semibold ${
                     timelineDayOffset === day.offset
                       ? 'bg-[#0D5B49] text-white'
-                      : 'bg-white dark:bg-[#1E2E26] text-[#52645B] border border-[#D3DDD6] dark:border-[#2B3C34]'
+                      : 'bg-white dark:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] border border-[#D3DDD6] dark:border-[#2B3C34]'
                   }`}
                 >
                   +{day.offset}d
@@ -1307,7 +1307,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                   saveGovtOrders(markAll);
                   onToast('सभी आदेश पठित चिह्नित किए गए');
                 }}
-                className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-xs font-medium"
+                className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26] text-xs font-medium"
               >
                 सभी पठित करें
               </button>
@@ -1347,7 +1347,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                         handleMarkOrderRead(order.id);
                         setSelectedOrder(order);
                       }}
-                      className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-xs font-medium hover:bg-[#F1F5F2]"
+                      className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] text-xs font-medium hover:bg-[#F1F5F2] dark:hover:bg-[#1E2E26]"
                     >
                       पूरा आदेश देखें
                     </button>

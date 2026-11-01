@@ -20,7 +20,12 @@
       try {
         var s = localStorage.getItem('btd-theme');
         var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', s || (d ? 'dark' : 'light'));
+        var t = (s === 'dark' || s === 'light') ? s : (d ? 'dark' : 'light');
+        var root = document.documentElement;
+        root.setAttribute('data-theme', t);
+        root.classList.toggle('dark', t === 'dark');
+        root.classList.toggle('light', t === 'light');
+        root.style.colorScheme = t;
       } catch(e) {}
     })();
 

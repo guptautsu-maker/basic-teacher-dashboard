@@ -42,31 +42,66 @@ import {
   getStoredAppSettings,
   saveStoredAppSettings,
 } from './utils/privacyAndSecurityManager';
+import {
+  ThemeMode,
+  getBrowserInitialTheme,
+  getNextTheme,
+  applyThemeToDom,
+  normalizeTheme,
+  THEME_STORAGE_KEY,
+} from './utils/themeManager';
 
 export const App: React.FC = () => {
-  // Theme management
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    try {
-      const saved = localStorage.getItem('btd-theme');
-      if (saved === 'dark' || saved === 'light') return saved;
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return isDark ? 'dark' : 'light';
-    } catch {
-      return 'light';
-    }
+  // Theme management — applies synchronously to <html> and <body> so all dynamic Tailwind dark:* and CSS token elements update immediately
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    const initial = getBrowserInitialTheme();
+    applyThemeToDom(initial);
+    return initial;
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    try {
-      localStorage.setItem('btd-theme', theme);
-    } catch {
-      // ignore
-    }
+    applyThemeToDom(theme);
   }, [theme]);
 
+  useEffect(() => {
+    const handleStorageOrCustomTheme = (e: Event) => {
+      if (e.type === 'btd-theme-changed') {
+        const customEvt = e as CustomEvent<{ theme?: ThemeMode }>;
+        const next = normalizeTheme(customEvt.detail?.theme);
+        if (next) {
+          setTheme((prev) => (prev === next ? prev : next));
+        }
+        return;
+      }
+      try {
+        const stored = normalizeTheme(localStorage.getItem(THEME_STORAGE_KEY));
+        if (stored) {
+          setTheme((prev) => {
+            if (prev !== stored) {
+              applyThemeToDom(stored);
+              return stored;
+            }
+            return prev;
+          });
+        }
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener('btd-theme-changed', handleStorageOrCustomTheme);
+    window.addEventListener('storage', handleStorageOrCustomTheme);
+    return () => {
+      window.removeEventListener('btd-theme-changed', handleStorageOrCustomTheme);
+      window.removeEventListener('storage', handleStorageOrCustomTheme);
+    };
+  }, []);
+
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setTheme((prev) => {
+      const next = getNextTheme(prev);
+      applyThemeToDom(next);
+      return next;
+    });
   };
 
   // Toast notifications

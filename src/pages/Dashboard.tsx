@@ -737,7 +737,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
                 dashboardMode === 'teacher_hub'
                   ? 'bg-white dark:bg-[#16231D] text-[#0D5B49] dark:text-[#00F5D4] shadow-xs'
-                  : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+                  : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
               }`}
             >
               मुख्य डैशबोर्ड
@@ -748,7 +748,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
                 dashboardMode === 'portals'
                   ? 'bg-white dark:bg-[#16231D] text-[#0D5B49] dark:text-[#00F5D4] shadow-xs'
-                  : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+                  : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
               }`}
             >
               क्लासिक टूल्स व नोट्स

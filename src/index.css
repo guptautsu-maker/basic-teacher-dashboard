@@ -1,7 +1,9 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 /* ============ COLORS & TOKENS ============ */
 :root {
+  color-scheme: light;
   --brand: #0D5B49;
   --brand-soft: #DCEEE6;
   --neon: #00F5D4;
@@ -23,7 +25,9 @@
   --font-b: 'Inter', 'Mukta', Arial, sans-serif;
 }
 
-[data-theme="dark"] {
+[data-theme="dark"],
+.dark {
+  color-scheme: dark;
   --bg: #0A0E27;
   --surface: #16231D;
   --surface2: #1E2E26;
@@ -35,12 +39,32 @@
   --danger: #F2867E;
 }
 
+[data-theme="dark"] select option,
+.dark select option {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
 @layer base {
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
+
+  button,
+  input,
+  select,
+  textarea {
+    color: inherit;
+  }
+}
+
+html[data-theme-switching="true"] *,
+html[data-theme-switching="true"] *::before,
+html[data-theme-switching="true"] *::after {
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
 }
 
 html {
@@ -53,7 +77,6 @@ body {
   color: var(--ink);
   line-height: 1.6;
   min-height: 100vh;
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -570,6 +593,14 @@ img {
 
 .sidebar-logout-btn:hover {
   background: #FEF2F2;
+}
+
+[data-theme="dark"] .sidebar-logout-btn {
+  color: #F87171;
+}
+
+[data-theme="dark"] .sidebar-logout-btn:hover {
+  background: rgba(220, 38, 38, 0.16);
 }
 
 /* Right Main Workspace Column */
