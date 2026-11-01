@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Header } from './components/Header';
+import { Header, WorkspaceSidebar, WorkspaceTopbar } from './components/Header';
 import { MobileDrawer } from './components/MobileDrawer';
 import { Footer } from './components/Footer';
 import { Toast } from './components/Toast';
@@ -372,27 +372,44 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleQuickEnterWorkspace = () => {
+    if (!currentUser) {
+      const demoUser: UserProfile = {
+        name: 'श्री राजेश कुमार शर्मा',
+        email: 'rajesh.sharma.prt@basicshiksha.up.gov.in',
+      };
+      setCurrentUser(demoUser);
+      setStoredUser(demoUser);
+    }
+    navigateTo('dashboard');
+  };
+
+  const isPublicLayout = activePage === 'home' || activePage === 'login';
+
+  const headerProps = {
+    activePage,
+    setActivePage: navigateTo,
+    theme,
+    toggleTheme,
+    isDrawerOpen,
+    setIsDrawerOpen,
+    currentUser,
+    onLogout: handleLogout,
+    unreadCount: reminderService.unreadCount,
+    onOpenSearch: () => setIsGlobalSearchOpen(true),
+    onOpenSettings: (
+      tab: 'general' | 'school' | 'notifications' | 'privacy' | 'backup' = 'general'
+    ) => {
+      setSettingsModalTab(tab);
+      setIsSettingsModalOpen(true);
+    },
+    activeRole: appSettings.role,
+    onRoleChange: handleGlobalRoleChange,
+    onQuickEnterWorkspace: handleQuickEnterWorkspace,
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header
-        activePage={activePage}
-        setActivePage={navigateTo}
-        theme={theme}
-        toggleTheme={toggleTheme}
-        isDrawerOpen={isDrawerOpen}
-        setIsDrawerOpen={setIsDrawerOpen}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-        unreadCount={reminderService.unreadCount}
-        onOpenSearch={() => setIsGlobalSearchOpen(true)}
-        onOpenSettings={(tab = 'general') => {
-          setSettingsModalTab(tab);
-          setIsSettingsModalOpen(true);
-        }}
-        activeRole={appSettings.role}
-        onRoleChange={handleGlobalRoleChange}
-      />
-
       <MobileDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
@@ -403,122 +420,151 @@ export const App: React.FC = () => {
         unreadCount={reminderService.unreadCount}
       />
 
-      <div style={{ flex: 1 }}>
-        {activePage === 'home' && <Home onNavigate={navigateTo} onToast={showToast} />}
-        {activePage === 'notifications' && (
-          <NotificationCenter
-            notifications={reminderService.notifications}
-            settings={reminderService.settings}
-            unreadCount={reminderService.unreadCount}
-            lastCheckedAt={reminderService.lastCheckedAt}
-            isScanning={reminderService.isScanning}
-            onScanNow={reminderService.scanNow}
-            onSnooze={reminderService.handleSnooze}
-            onDismiss={reminderService.handleDismiss}
-            onMarkRead={reminderService.handleMarkRead}
-            onMarkAllRead={reminderService.handleMarkAllRead}
-            onClearAll={reminderService.handleClearAll}
-            onUpdateSettings={reminderService.updateSettings}
+      {isPublicLayout ? (
+        <>
+          <Header {...headerProps} />
+          <main style={{ flex: 1 }}>
+            {activePage === 'home' && (
+              <Home
+                onNavigate={(page) => {
+                  if (page === 'dashboard' && !currentUser) {
+                    handleQuickEnterWorkspace();
+                  } else {
+                    navigateTo(page);
+                  }
+                }}
+                onToast={showToast}
+              />
+            )}
+            {activePage === 'login' && (
+              <Login
+                onSuccess={(profile) => {
+                  setCurrentUser(profile);
+                  setStoredUser(profile);
+                }}
+                onNavigate={navigateTo}
+                onToast={showToast}
+              />
+            )}
+          </main>
+          <Footer
+            variant={activePage === 'home' ? 'full' : 'slim'}
             onNavigate={navigateTo}
             onToast={showToast}
           />
-        )}
-        {activePage === 'classes' && (
-          <MyClassesManager
-            onToast={showToast}
-            onNavigate={navigateTo}
-            currentUser={currentUser}
-          />
-        )}
-        {activePage === 'rollover' && (
-          <AnnualRolloverWizard
-            onToast={showToast}
-            onNavigate={navigateTo}
-            currentUser={currentUser}
-          />
-        )}
-        {activePage === 'dashboard' && (
-          <Dashboard
-            currentUser={currentUser}
-            onToast={showToast}
-            onNavigate={navigateTo}
-          />
-        )}
-        {activePage === 'trainings' && (
-          <TrainingsManager
-            onToast={showToast}
-            onNavigate={navigateTo}
-            currentUser={currentUser}
-          />
-        )}
-        {activePage === 'duties' && (
-          <DutiesManager
-            onToast={showToast}
-            onNavigate={navigateTo}
-            currentUser={currentUser}
-          />
-        )}
-        {activePage === 'portals' && (
-          <PortalsManager
-            onToast={showToast}
-            onNavigate={navigateTo}
-          />
-        )}
-        {activePage === 'govt_orders' && (
-          <GovtOrdersManager
-            onToast={showToast}
-            onNavigate={navigateTo}
-            currentUser={currentUser}
-          />
-        )}
-        {activePage === 'meetings' && (
-          <MeetingsManager
-            onToast={showToast}
-            onNavigate={navigateTo}
-            currentUser={currentUser}
-          />
-        )}
-        {activePage === 'sheets' && (
-          <Sheets
-            currentUser={currentUser}
-            onToast={showToast}
-            onNavigate={navigateTo}
-          />
-        )}
-        {activePage === 'safeguards' && (
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6">
-            <SafeguardsHub
-              tasks={tasks}
-              onTasksUpdated={handleTasksUpdated}
-              duties={duties}
-              meetings={meetings}
-              trainings={trainings}
-              orders={orders}
-              portals={portals}
-              classes={classes}
-              onToast={showToast}
+        </>
+      ) : (
+        <div className="app-shell-authenticated">
+          <WorkspaceSidebar {...headerProps} />
+          <div className="app-main-area">
+            <WorkspaceTopbar {...headerProps} />
+            <main className="app-workspace-content">
+              {activePage === 'notifications' && (
+                <NotificationCenter
+                  notifications={reminderService.notifications}
+                  settings={reminderService.settings}
+                  unreadCount={reminderService.unreadCount}
+                  lastCheckedAt={reminderService.lastCheckedAt}
+                  isScanning={reminderService.isScanning}
+                  onScanNow={reminderService.scanNow}
+                  onSnooze={reminderService.handleSnooze}
+                  onDismiss={reminderService.handleDismiss}
+                  onMarkRead={reminderService.handleMarkRead}
+                  onMarkAllRead={reminderService.handleMarkAllRead}
+                  onClearAll={reminderService.handleClearAll}
+                  onUpdateSettings={reminderService.updateSettings}
+                  onNavigate={navigateTo}
+                  onToast={showToast}
+                />
+              )}
+              {activePage === 'classes' && (
+                <MyClassesManager
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                  currentUser={currentUser}
+                />
+              )}
+              {activePage === 'rollover' && (
+                <AnnualRolloverWizard
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                  currentUser={currentUser}
+                />
+              )}
+              {activePage === 'dashboard' && (
+                <Dashboard
+                  currentUser={currentUser}
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                />
+              )}
+              {activePage === 'trainings' && (
+                <TrainingsManager
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                  currentUser={currentUser}
+                />
+              )}
+              {activePage === 'duties' && (
+                <DutiesManager
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                  currentUser={currentUser}
+                />
+              )}
+              {activePage === 'portals' && (
+                <PortalsManager
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                />
+              )}
+              {activePage === 'govt_orders' && (
+                <GovtOrdersManager
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                  currentUser={currentUser}
+                />
+              )}
+              {activePage === 'meetings' && (
+                <MeetingsManager
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                  currentUser={currentUser}
+                />
+              )}
+              {activePage === 'sheets' && (
+                <Sheets
+                  currentUser={currentUser}
+                  onToast={showToast}
+                  onNavigate={navigateTo}
+                />
+              )}
+              {activePage === 'safeguards' && (
+                <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6">
+                  <SafeguardsHub
+                    tasks={tasks}
+                    onTasksUpdated={handleTasksUpdated}
+                    duties={duties}
+                    meetings={meetings}
+                    trainings={trainings}
+                    orders={orders}
+                    portals={portals}
+                    classes={classes}
+                    onToast={showToast}
+                    onNavigate={navigateTo}
+                    currentUser={currentUser}
+                  />
+                </div>
+              )}
+            </main>
+            <Footer
+              variant="slim"
               onNavigate={navigateTo}
-              currentUser={currentUser}
+              onToast={showToast}
             />
           </div>
-        )}
-        {activePage === 'login' && (
-          <Login
-            onSuccess={(profile) => {
-              setCurrentUser(profile);
-              setStoredUser(profile);
-            }}
-            onNavigate={navigateTo}
-            onToast={showToast}
-          />
-        )}
-      </div>
-
-      <Footer
-        variant={activePage === 'home' ? 'full' : 'slim'}
-        onNavigate={navigateTo}
-        onToast={showToast}
-      />
+        </div>
+      )}
 
       <GlobalSearchModal
         isOpen={isGlobalSearchOpen}
