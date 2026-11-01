@@ -3,8 +3,13 @@ import assert from 'node:assert/strict';
 import {
   Task,
   TaskStatus,
+  TaskCategory,
   RecurrenceFrequency,
   STATUS_METADATA,
+  TASK_CATEGORY_METADATA,
+  resolveTaskCategory,
+  filterTasksByCategory,
+  countTasksByCategory,
   isTaskOverdue,
   calculateEffectiveStatus,
   calculateNextDeadline,
@@ -395,4 +400,78 @@ describe('Teacher Hub Task Status System', () => {
       assert.equal(reopened.statusLog.newStatus, 'in_progress');
     });
   });
+
+  describe('5. Task Category Model & Filtering (Administrative, Academic, Extra-curricular)', () => {
+    it('supports all 3 required categories with metadata and bilingual labels', () => {
+      const categories: TaskCategory[] = ['Administrative', 'Academic', 'Extra-curricular'];
+      for (const cat of categories) {
+        const meta = TASK_CATEGORY_METADATA[cat];
+        assert.ok(meta, `Metadata must exist for category ${cat}`);
+        assert.equal(meta.code, cat);
+        assert.ok(meta.labelEn.length > 0);
+        assert.ok(meta.labelHi.length > 0);
+      }
+    });
+
+    it('assigns explicit or inferred category on createNewTask and preserves it on recurrence', () => {
+      const { task: explicitTask } = createNewTask({
+        title: 'Annual Sports Day Preparation',
+        type: 'general',
+        category: 'Extra-curricular',
+        recurrence: 'yearly',
+        deadline: '2026-11-10T10:00:00.000Z',
+        now: fixedNow,
+        generateId: mockIdGen,
+      });
+      assert.equal(explicitTask.category, 'Extra-curricular');
+
+      const { task: inferredAcademic } = createNewTask({
+        title: 'DIKSHA FLN Module 4 Quiz',
+        type: 'training',
+        now: fixedNow,
+        generateId: mockIdGen,
+      });
+      assert.equal(inferredAcademic.category, 'Academic');
+
+      const { task: inferredAdmin } = createNewTask({
+        title: 'Prerna Daily Attendance',
+        type: 'attendance',
+        now: fixedNow,
+        generateId: mockIdGen,
+      });
+      assert.equal(inferredAdmin.category, 'Administrative');
+
+      const transition = changeTaskStatus({
+        task: explicitTask,
+        newStatus: 'done',
+        changedBy: 'teacher_sharma',
+        now: fixedNow,
+        generateId: mockIdGen,
+      });
+      assert.ok(transition.nextRecurringTask);
+      assert.equal(transition.nextRecurringTask!.category, 'Extra-curricular');
+    });
+
+    it('filters and counts tasks accurately across Administrative, Academic, and Extra-curricular', () => {
+      const list: Task[] = [
+        { ...sampleTask, id: 'c1', category: 'Administrative' },
+        { ...sampleTask, id: 'c2', category: 'Academic' },
+        { ...sampleTask, id: 'c3', category: 'Academic' },
+        { ...sampleTask, id: 'c4', category: 'Extra-curricular' },
+      ];
+
+      const counts = countTasksByCategory(list);
+      assert.equal(counts.all, 4);
+      assert.equal(counts.Administrative, 1);
+      assert.equal(counts.Academic, 2);
+      assert.equal(counts['Extra-curricular'], 1);
+
+      assert.equal(filterTasksByCategory(list, 'all').length, 4);
+      assert.equal(filterTasksByCategory(list, 'Administrative').length, 1);
+      assert.equal(filterTasksByCategory(list, 'Academic').length, 2);
+      assert.equal(filterTasksByCategory(list, 'Extra-curricular').length, 1);
+      assert.equal(resolveTaskCategory(list[3]), 'Extra-curricular');
+    });
+  });
 });
+

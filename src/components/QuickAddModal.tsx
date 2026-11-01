@@ -1,5 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { Task, TaskPriority, TaskType, RecurrenceFrequency, createNewTask } from '../utils/taskStatusSystem';
+import {
+  Task,
+  TaskPriority,
+  TaskType,
+  TaskCategory,
+  RecurrenceFrequency,
+  createNewTask,
+  inferCategoryFromTaskType,
+} from '../utils/taskStatusSystem';
 import { MeetingItem, TrainingItem } from '../data/teacherHubSampleData';
 import { validateSensitiveData } from '../utils/privacyAndSecurityManager';
 import { SensitiveDataAlert } from './SensitiveDataGuardNotice';
@@ -27,6 +35,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
   // Task form state
   const [taskTitle, setTaskTitle] = useState('');
+  const [taskCategory, setTaskCategory] = useState<TaskCategory>('Administrative');
   const [taskType, setTaskType] = useState<TaskType>('portal_entry');
   const [taskPriority, setTaskPriority] = useState<TaskPriority>('urgent');
   const [taskSource, setTaskSource] = useState('Prerna App');
@@ -107,6 +116,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
       title: taskTitle.trim(),
       description: taskDescription.trim() || undefined,
       type: taskType,
+      category: taskCategory,
       source: taskSource,
       priority: taskPriority,
       status: 'not_started',
@@ -281,21 +291,41 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-[#52645B] dark:text-[#9DB0A5]">
-                    कार्य प्रकार / Category
+                    मुख्य श्रेणी / Category
+                  </label>
+                  <select
+                    aria-label="कार्य श्रेणी (Task Category)"
+                    value={taskCategory}
+                    onChange={(e) => setTaskCategory(e.target.value as TaskCategory)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#1E2E26] text-sm"
+                  >
+                    <option value="Administrative">🏛️ प्रशासनिक (Administrative)</option>
+                    <option value="Academic">📚 शैक्षणिक (Academic)</option>
+                    <option value="Extra-curricular">🎭 सह-पाठ्यचर्या (Extra-curricular)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 text-[#52645B] dark:text-[#9DB0A5]">
+                    कार्य प्रकार / Task Type
                   </label>
                   <select
                     value={taskType}
-                    onChange={(e) => setTaskType(e.target.value as TaskType)}
+                    onChange={(e) => {
+                      const nextType = e.target.value as TaskType;
+                      setTaskType(nextType);
+                      setTaskCategory(inferCategoryFromTaskType(nextType));
+                    }}
                     className="w-full px-3 py-2.5 rounded-xl border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#1E2E26] text-sm"
                   >
                     <option value="portal_entry">🌐 पोर्टल प्रविष्टि (Portal Entry)</option>
                     <option value="attendance">📋 उपस्थिति (Attendance)</option>
                     <option value="mdm">🍲 मध्याह्न भोजन (MDM)</option>
                     <option value="training">🎓 प्रशिक्षण (Training)</option>
-                    <option value="duty">🎖️ विशेष ड्यूटी (Duty / Election)</option>
+                    <option value="duty">🎖️ विशेष ड्यूटी (Duty / Activity)</option>
                     <option value="meeting">👥 बैठक (Meeting)</option>
                     <option value="govt_order">📜 शासनादेश अनुपालन (Order)</option>
                     <option value="general">📌 सामान्य कार्य (General)</option>

@@ -69,6 +69,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'UDISE+ छात्र प्रोफ़ाइल व आधार प्रमाणीकरण (Student Profile & Aadhaar Verification)',
       description: 'सभी नव-प्रवेशी व मौजूदा छात्रों के आधार व माता-पिता के विवरण का UDISE+ पोर्टल पर शत-प्रतिशत सत्यापन।',
       type: 'portal_entry',
+      category: 'Administrative',
       source: 'UDISE+ Portal',
       portalUrl: 'https://udiseplus.gov.in',
       deadline: toIso(-4, 17, 0), // 4 days ago (Critical > 3 days)
@@ -84,6 +85,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'मासिक मध्याह्न भोजन (MDM) खाद्यान्न व कन्वर्जन कॉस्ट रिपोर्ट जमा',
       description: 'गत माह का छात्र उपस्थिति अनुसार खाद्यान्न उपभोग व परिवर्तन लागत विवरण बीआरसी को प्रेषित करना।',
       type: 'mdm',
+      category: 'Administrative',
       source: 'MDM IVRS & BRC',
       portalUrl: 'https://prernaup.in',
       deadline: toIso(-1, 15, 0), // 1 day ago
@@ -101,6 +103,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'प्रेरणा ऐप पर दैनिक छात्र व शिक्षक उपस्थिति (Prerna Daily Attendance)',
       description: 'प्रातः विद्यालय समय में जियो-फेंसिंग (Geo-fencing) के अंतर्गत छात्र व शिक्षक डिजिटल उपस्थिति दर्ज करना।',
       type: 'attendance',
+      category: 'Administrative',
       source: 'Prerna App',
       portalUrl: 'https://prernaup.in',
       deadline: toIso(0, 9, 15), // Today 09:15 AM
@@ -116,6 +119,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'मध्याह्न भोजन (MDM) दैनिक लाभार्थी संख्या IVRS कॉल / SMS प्रेषण',
       description: 'आज भोजन ग्रहण करने वाले पंजीकृत विद्यार्थियों की संख्या 15544 टोल-फ्री आईवीआरएस पर दर्ज करना।',
       type: 'mdm',
+      category: 'Administrative',
       source: 'MDM IVRS 15544',
       portalUrl: 'https://prernaup.in',
       deadline: toIso(0, 11, 30), // Today 11:30 AM
@@ -131,6 +135,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'दीक्षा (DIKSHA) FLN 3.0 मॉड्यूल-4 ऑनलाइन असेसमेंट क्विज',
       description: 'बुनियादी भाषा एवं संख्या ज्ञान (FLN) प्रशिक्षण मॉड्यूल पूर्ण कर 70% अंकों के साथ प्रमाणपत्र प्राप्त करना।',
       type: 'training',
+      category: 'Academic',
       source: 'DIKSHA Portal',
       portalUrl: 'https://diksha.gov.in',
       deadline: toIso(0, 17, 0), // Today 05:00 PM
@@ -146,6 +151,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'कक्षा 1 से 3 निपुण तालिका (NIPUN Bharat Tracker) अद्यतन',
       description: 'सप्ताह की शिक्षण योजना अनुसार बच्चों के अधिगम प्रतिफल (Learning Outcomes) का दैनिक अंकन।',
       type: 'general',
+      category: 'Academic',
       source: 'School Register',
       deadline: toIso(0, 14, 0), // Today 02:00 PM
       priority: 'medium',
@@ -156,6 +162,21 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       createdAt: toIso(0, 8, 0),
       updatedAt: toIso(0, 10, 0),
     },
+    {
+      id: 'th-task-today-5',
+      title: 'प्रार्थना सभा, बाल संसद व खेलकूद गतिविधि (Morning Assembly & Sports)',
+      description: 'छात्रों द्वारा दैनिक समाचार वाचन, स्वच्छता जाँच एवं अपराह्न 30 मिनट आउटडोर खेल गतिविधि।',
+      type: 'duty',
+      category: 'Extra-curricular',
+      source: 'School Activity Roster',
+      deadline: toIso(0, 15, 30), // Today 03:30 PM
+      priority: 'medium',
+      status: 'not_started',
+      recurrence: 'daily',
+      assignedTo: 'खेल एवं सांस्कृतिक प्रभारी',
+      createdAt: toIso(0, 8, 0),
+      updatedAt: toIso(0, 8, 0),
+    },
 
     // UPCOMING 7 DAYS TASKS
     {
@@ -163,6 +184,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'निपुण लक्ष्य ऐप (NIPUN Lakshya App) साप्ताहिक स्पॉट असेसमेंट',
       description: 'एआरपी (ARP) / डायट मेंटर्स द्वारा किए जाने वाले स्पॉट असेसमेंट हेतु बच्चों का अभ्यास।',
       type: 'portal_entry',
+      category: 'Academic',
       source: 'NIPUN Lakshya App',
       deadline: toIso(1, 12, 0), // Tomorrow
       priority: 'high',
@@ -176,6 +198,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'निःशुल्क पाठ्यपुस्तक व स्कूल बैग वितरण प्राप्ति रसीद पोर्टल अपलोड',
       description: 'छात्रों को वितरित पुस्तकों की संख्या व छात्र पंजिका क्रमांक की प्रविष्टि प्रेरणा डीबीटी पोर्टल पर करना।',
       type: 'portal_entry',
+      category: 'Administrative',
       source: 'Prerna DBT',
       portalUrl: 'https://prernaup.in',
       deadline: toIso(2, 16, 0), // In 2 days
@@ -190,6 +213,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'संचारी रोग नियंत्रण अभियान (Sanchari Rog) प्रभात फेरी व स्वच्छता शपथ',
       description: 'ग्राम पंचायत में बच्चों के साथ स्वास्थ्य जागरूकता रैली एवं अभिभावक परिचर्चा।',
       type: 'duty',
+      category: 'Extra-curricular',
       source: 'BSA Circular',
       deadline: toIso(3, 10, 0), // In 3 days
       priority: 'high',
@@ -203,6 +227,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'मानव संपदा पोर्टल: सेवा पुस्तिका (e-Service Book) वार्षिक सत्यापन',
       description: 'शिक्षक सेवा अभिलेख, पदोन्नति एवं अवकाश विवरण की ऑनलाइन पुष्टि व संशोधन अनुरोध।',
       type: 'portal_entry',
+      category: 'Administrative',
       source: 'Manav Sampada (ehrms)',
       portalUrl: 'https://ehrms.upsdc.gov.in',
       deadline: toIso(4, 17, 0), // In 4 days
@@ -217,6 +242,7 @@ export const getInitialTeacherHubTasks = (): Task[] => {
       title: 'कंपोजिट ग्रांट (Composite School Grant) व्यय वाउचर व पीएफएमएस (PFMS) प्रविष्टि',
       description: 'विद्यालय रखरखाव एवं टीएलएम क्रय के बिल-वाउचर एसएमसी अध्यक्ष से हस्ताक्षरित कराकर पोर्टल पर दर्ज करना।',
       type: 'general',
+      category: 'Administrative',
       source: 'PFMS / SMC',
       portalUrl: 'https://pfms.nic.in',
       deadline: toIso(6, 15, 0), // In 6 days

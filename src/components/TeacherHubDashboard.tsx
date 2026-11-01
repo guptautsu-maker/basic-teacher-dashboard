@@ -3,7 +3,12 @@ import {
   Task,
   TaskStatus,
   TaskPriority,
+  TaskCategory,
   STATUS_METADATA,
+  TASK_CATEGORY_METADATA,
+  resolveTaskCategory,
+  filterTasksByCategory,
+  countTasksByCategory,
   changeTaskStatus,
   syncOverdueTasks,
 } from '../utils/taskStatusSystem';
@@ -220,6 +225,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   const [quickAddTab, setQuickAddTab] = useState<'task' | 'meeting' | 'training'>('task');
   const [selectedOrder, setSelectedOrder] = useState<GovtOrderItem | null>(null);
   const [activeFilterStatus, setActiveFilterStatus] = useState<TaskStatus | 'all'>('all');
+  const [activeFilterCategory, setActiveFilterCategory] = useState<TaskCategory | 'all'>('all');
   const [timelineDayOffset, setTimelineDayOffset] = useState<number | 'all'>('all');
   const [activeSectionTab, setActiveSectionTab] = useState<'today' | 'upcoming' | 'orders' | 'tools'>('today');
 
@@ -394,7 +400,15 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   // -------------------------------------------------------------
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
-  // Quick Status Counts
+  // Category Counts & Filtered Task List
+  const categoryCounts = useMemo(() => countTasksByCategory(tasks), [tasks]);
+
+  const categoryFilteredTasks = useMemo(
+    () => filterTasksByCategory(tasks, activeFilterCategory),
+    [tasks, activeFilterCategory]
+  );
+
+  // Quick Status Counts (respects selected Category filter)
   const statusCounts = useMemo(() => {
     const counts = {
       not_started: 0,
@@ -402,25 +416,25 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
       done: 0,
       overdue: 0,
     };
-    for (const t of tasks) {
+    for (const t of categoryFilteredTasks) {
       if (t.status === 'not_started') counts.not_started++;
       else if (t.status === 'in_progress') counts.in_progress++;
       else if (t.status === 'done') counts.done++;
       else if (t.status === 'overdue') counts.overdue++;
     }
     return counts;
-  }, [tasks]);
+  }, [categoryFilteredTasks]);
 
   // Overdue tasks
   const overdueTasks = useMemo(() => {
-    return tasks
+    return categoryFilteredTasks
       .filter((t) => t.status === 'overdue')
       .sort((a, b) => PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority]);
-  }, [tasks]);
+  }, [categoryFilteredTasks]);
 
   // Today tasks & meetings ("Aaj ka kaam") or filtered by status
   const todayTasks = useMemo(() => {
-    return tasks
+    return categoryFilteredTasks
       .filter((t) => {
         if (activeFilterStatus !== 'all') {
           return t.status === activeFilterStatus;
@@ -436,7 +450,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
         if (a.status !== 'done' && b.status === 'done') return -1;
         return 0;
       });
-  }, [tasks, todayStr, activeFilterStatus]);
+  }, [categoryFilteredTasks, todayStr, activeFilterStatus]);
 
   const todayMeetings = useMemo(() => {
     return meetings.filter((m) => m.date === todayStr);
@@ -469,7 +483,9 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
       const dateStr = d.toISOString().split('T')[0];
       const dayIdx = d.getDay();
 
-      const dayTasks = tasks.filter((t) => t.deadline && t.deadline.startsWith(dateStr));
+      const dayTasks = categoryFilteredTasks.filter(
+        (t) => t.deadline && t.deadline.startsWith(dateStr)
+      );
       const dayMeetings = meetings.filter((m) => m.date === dateStr);
       const dayTrainings = trainings.filter((tr) => tr.dueDate === dateStr);
 
@@ -485,7 +501,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
     }
 
     return days;
-  }, [tasks, meetings, trainings]);
+  }, [categoryFilteredTasks, meetings, trainings]);
 
   return (
     <div className="space-y-6 pb-12">
@@ -732,10 +748,13 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
         </div>
 
         <div className="flex items-center gap-3 text-xs">
-          {activeFilterStatus !== 'all' && (
+          {(activeFilterStatus !== 'all' || activeFilterCategory !== 'all') && (
             <button
               type="button"
-              onClick={() => setActiveFilterStatus('all')}
+              onClick={() => {
+                setActiveFilterStatus('all');
+                setActiveFilterCategory('all');
+              }}
               className="text-[#0D5B49] dark:text-[#00F5D4] font-semibold hover:underline"
             >
               फिल्टर हटाएं (Show All) ✕
@@ -757,6 +776,56 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
           </button>
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* 3B. TASK CATEGORY FILTER BAR                              */}
+      {/* ========================================================= */}
+      {(activeSectionTab === 'today' || activeSectionTab === 'upcoming') && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-white dark:bg-[#16231D] border border-[#D3DDD6] dark:border-[#2B3C34]"
+          role="region"
+          aria-label="कार्य श्रेणी फिल्टर (Task Category Filter)"
+        >
+          <span className="text-xs font-semibold text-[#52645B] dark:text-[#9DB0A5]">
+            श्रेणी अनुसार छाँटें (Filter by Category):
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setActiveFilterCategory('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                activeFilterCategory === 'all'
+                  ? 'bg-[#0D5B49] text-white'
+                  : 'bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+              }`}
+            >
+              सभी श्रेणियाँ (All · {categoryCounts.all})
+            </button>
+
+            {(['Administrative', 'Academic', 'Extra-curricular'] as TaskCategory[]).map((cat) => {
+              const meta = TASK_CATEGORY_METADATA[cat];
+              const isSelected = activeFilterCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setActiveFilterCategory(isSelected ? 'all' : cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-[#0D5B49] text-white'
+                      : 'bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] hover:bg-[#E6EDE8]'
+                  }`}
+                >
+                  <span aria-hidden="true">{meta.icon}</span>
+                  <span>
+                    {meta.labelHi} ({meta.labelEn} · {categoryCounts[cat]})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* TAB 1: TODAY & OVERDUE TASKS                              */}
@@ -801,6 +870,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
               <div className="space-y-2.5">
                 {overdueTasks.map((task) => {
                   const priorityInfo = PRIORITY_BADGES[task.priority];
+                  const catMeta = TASK_CATEGORY_METADATA[resolveTaskCategory(task)];
                   return (
                     <div
                       key={task.id}
@@ -810,6 +880,11 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                         <div className="flex flex-wrap items-center gap-2 text-xs text-[#52645B] dark:text-[#9DB0A5]">
                           <span className="font-semibold text-rose-700 dark:text-rose-400">
                             {priorityInfo.labelHi}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[11px] font-semibold ${catMeta.badgeBg} ${catMeta.badgeText}`}
+                          >
+                            {catMeta.icon} {catMeta.labelHi} ({catMeta.labelEn})
                           </span>
                           {task.source && (
                             <>
@@ -966,6 +1041,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 {/* Today Tasks */}
                 {todayTasks.map((task) => {
                   const priorityInfo = PRIORITY_BADGES[task.priority];
+                  const catMeta = TASK_CATEGORY_METADATA[resolveTaskCategory(task)];
                   const isCompleted = task.status === 'done';
 
                   return (
@@ -981,6 +1057,11 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                         <div className="flex flex-wrap items-center gap-2 text-xs text-[#52645B] dark:text-[#9DB0A5]">
                           <span className="font-semibold text-[#13231C] dark:text-[#E7F0EA]">
                             {priorityInfo.labelHi}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[11px] font-semibold ${catMeta.badgeBg} ${catMeta.badgeText}`}
+                          >
+                            {catMeta.icon} {catMeta.labelHi} ({catMeta.labelEn})
                           </span>
                           {task.source && (
                             <>

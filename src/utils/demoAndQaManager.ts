@@ -279,6 +279,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'UDISE+ छात्र प्रोफ़ाइल व नामांकन सत्यापन (Student Profile Verification)',
       description: 'कक्षा 4A व 5B के सभी विद्यार्थियों के सामान्य प्रोफ़ाइल प्रपत्र का UDISE+ पोर्टल पर सत्यापन।',
       type: 'portal_entry',
+      category: 'Administrative',
       source: 'UDISE+ Portal',
       portalUrl: 'https://udiseplus.gov.in',
       deadline: offsetIso(baseDate, -4, 17, 0), // 4 days overdue -> Critical Escalation
@@ -294,6 +295,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'DBT अक्रियाशील (Unseeded) बैंक खाता अभिभावक संपर्क व सहमति पत्र',
       description: 'डीबीटी यूनिफॉर्म/बैग धनराशि अंतरण हेतु लंबित 3 अभिभावकों को बैंक केवाईसी कराने हेतु सूचित करना।',
       type: 'portal_entry',
+      category: 'Administrative',
       source: 'Prerna DBT App',
       portalUrl: 'https://prernaup.in',
       deadline: offsetIso(baseDate, -1, 16, 0), // 1 day overdue
@@ -309,6 +311,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'दैनिक छात्र व शिक्षक ऑनलाइन उपस्थिति (Prerna Morning Attendance)',
       description: 'प्रातः 09:15 बजे तक प्रेरणा पोर्टल पंजिका पर कक्षा 4A व 5B की उपस्थिति दर्ज कर सिंक करना।',
       type: 'attendance',
+      category: 'Administrative',
       source: 'Prerna Portal UP',
       portalUrl: 'https://prernaup.in',
       deadline: offsetIso(baseDate, 0, 10, 0), // Today
@@ -324,6 +327,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'मध्याह्न भोजन (MDM) लाभार्थी संख्या व मेन्यू पंजिका प्रविष्टि',
       description: 'दोपहर भोजन वितरण के उपरांत लाभार्थी छात्र संख्या व खाद्यान्न उपभोग दर्ज करना।',
       type: 'mdm',
+      category: 'Administrative',
       source: 'PM POSHAN / Prerna',
       portalUrl: 'https://prernaup.in',
       deadline: offsetIso(baseDate, 0, 14, 0), // Today
@@ -339,6 +343,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'निपुण भारत (NIPUN Lakshya) साप्ताहिक आकलन तालिका अपडेट',
       description: 'सप्ताह 14 के भाषा एवं गणित सादगी आकलन (Spot Assessment) के परिणाम निपुण तालिका में अंकित करना।',
       type: 'general',
+      category: 'Academic',
       source: 'NIPUN Bharat Cell',
       portalUrl: 'https://prernaup.in',
       deadline: offsetIso(baseDate, 1, 16, 0), // Tomorrow (1 day before rule)
@@ -354,6 +359,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'विद्यालय प्रबंध समिति (SMC) मासिक बैठक कार्यवृत्त व प्रस्ताव लेखन',
       description: 'आज की SMC/PTM बैठक में पारित प्रस्तावों को बैठक पंजिका में दर्ज कर हस्ताक्षर लेना।',
       type: 'meeting',
+      category: 'Administrative',
       source: 'SMC Register',
       deadline: offsetIso(baseDate, 2, 17, 0), // +2 days
       priority: 'medium',
@@ -368,6 +374,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'कंपोजिट स्कूल ग्रांट (PFMS) व्यय वाउचर एवं कैशबुक सत्यापन',
       description: 'विद्यालय स्वच्छता व टीएलएम (TLM) मद के बिल वाउचर प्रधानाध्यापक से अनुमोदन हेतु प्रस्तुत करना।',
       type: 'govt_order',
+      category: 'Administrative',
       source: 'BSA / PFMS Portal',
       deadline: offsetIso(baseDate, 3, 17, 0), // +3 days (3 days before rule)
       priority: 'high',
@@ -382,6 +389,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'रीडिंग कॉर्नर व पुस्तकालय साप्ताहिक पुस्तक निर्गमन (Book Issue)',
       description: 'कक्षा 4 एवं 5 के छात्रों को स्तरानुसार कहानी की पुस्तकें आवंटित करना व पठन रजिस्टर भरना।',
       type: 'duty',
+      category: 'Academic',
       source: 'School Library',
       deadline: offsetIso(baseDate, 4, 15, 0), // +4 days
       priority: 'low',
@@ -396,6 +404,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'मानव संपदा (eHRMS) वार्षिक सेवा पुस्तिका (e-Service Book) एवं अवकाश विवरण जाँच',
       description: 'मानव संपदा पोर्टल पर अपनी ई-सर्विस बुक व अर्जित/आकस्मिक अवकाश बैलेंस का वार्षिक सत्यापन।',
       type: 'portal_entry',
+      category: 'Administrative',
       source: 'Manav Sampada UP',
       portalUrl: 'https://ehrms.upsdc.gov.in',
       deadline: offsetIso(baseDate, 6, 17, 0), // +6 days
@@ -411,6 +420,7 @@ export function generateDemoTeacherProfileDataset(
       title: 'संचारी रोग नियंत्रण अभियान — प्रार्थना सभा जागरूकता एवं स्वच्छता शपथ',
       description: 'छात्रों को डेंगू/मलेरिया से बचाव के नियम बताना एवं परिसर जल-जमाव निरीक्षण पूर्ण।',
       type: 'govt_order',
+      category: 'Extra-curricular',
       source: 'BSA Circular',
       deadline: offsetIso(baseDate, -1, 11, 0),
       priority: 'medium',

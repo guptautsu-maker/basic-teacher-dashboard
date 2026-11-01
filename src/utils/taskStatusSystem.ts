@@ -27,6 +27,99 @@ export type TaskType =
   | 'annual_update'
   | 'general';
 
+export type TaskCategory = 'Administrative' | 'Academic' | 'Extra-curricular';
+
+export interface TaskCategoryMeta {
+  code: TaskCategory;
+  labelEn: string;
+  labelHi: string;
+  icon: string;
+  badgeBg: string;
+  badgeText: string;
+}
+
+export const TASK_CATEGORY_METADATA: Record<TaskCategory, TaskCategoryMeta> = {
+  Administrative: {
+    code: 'Administrative',
+    labelEn: 'Administrative',
+    labelHi: 'प्रशासनिक',
+    icon: '🏛️',
+    badgeBg: 'bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800',
+    badgeText: 'text-teal-800 dark:text-teal-300',
+  },
+  Academic: {
+    code: 'Academic',
+    labelEn: 'Academic',
+    labelHi: 'शैक्षणिक',
+    icon: '📚',
+    badgeBg: 'bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800',
+    badgeText: 'text-indigo-800 dark:text-indigo-300',
+  },
+  'Extra-curricular': {
+    code: 'Extra-curricular',
+    labelEn: 'Extra-curricular',
+    labelHi: 'सह-पाठ्यचर्या',
+    icon: '🎭',
+    badgeBg: 'bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800',
+    badgeText: 'text-amber-800 dark:text-amber-300',
+  },
+};
+
+export function inferCategoryFromTaskType(type: TaskType): TaskCategory {
+  switch (type) {
+    case 'training':
+    case 'general':
+      return 'Academic';
+    case 'duty':
+      return 'Extra-curricular';
+    case 'portal_entry':
+    case 'attendance':
+    case 'mdm':
+    case 'meeting':
+    case 'govt_order':
+    case 'annual_update':
+    default:
+      return 'Administrative';
+  }
+}
+
+export function resolveTaskCategory(
+  task: Pick<Task, 'category' | 'type'>
+): TaskCategory {
+  if (
+    task.category === 'Administrative' ||
+    task.category === 'Academic' ||
+    task.category === 'Extra-curricular'
+  ) {
+    return task.category;
+  }
+  return inferCategoryFromTaskType(task.type);
+}
+
+export function filterTasksByCategory(
+  tasks: Task[],
+  category: TaskCategory | 'all'
+): Task[] {
+  if (category === 'all') return tasks;
+  return tasks.filter((t) => resolveTaskCategory(t) === category);
+}
+
+export function countTasksByCategory(
+  tasks: Task[]
+): Record<TaskCategory | 'all', number> {
+  const counts: Record<TaskCategory | 'all', number> = {
+    all: tasks.length,
+    Administrative: 0,
+    Academic: 0,
+    'Extra-curricular': 0,
+  };
+  for (const t of tasks) {
+    const cat = resolveTaskCategory(t);
+    counts[cat] += 1;
+  }
+  return counts;
+}
+
 export interface StatusLog {
   id: string;
   entityType: 'task';
@@ -43,6 +136,7 @@ export interface Task {
   title: string;
   description?: string;
   type: TaskType;
+  category?: TaskCategory; // 'Administrative' | 'Academic' | 'Extra-curricular'
   source?: string; // e.g. 'UDISE+', 'Prerna', 'Manav Sampada', 'DIKSHA', 'BSA Office'
   portalUrl?: string;
   deadline?: string | null; // ISO 8601 string
@@ -439,6 +533,7 @@ export function createNewTask(
     title: params.title,
     description: params.description,
     type: params.type,
+    category: params.category || inferCategoryFromTaskType(params.type),
     source: params.source,
     portalUrl: params.portalUrl,
     deadline: params.deadline || null,
