@@ -23,10 +23,34 @@
         document.documentElement.setAttribute('data-theme', s || (d ? 'dark' : 'light'));
       } catch(e) {}
     })();
+
+    // Auto-recovery fallback for static hosts (e.g. Cloudflare Pages serving root '/' directly without Vite transform)
+    window.__loadStaticFallback = function() {
+      if (window.__STATIC_FALLBACK_LOADED__ || window.__APP_MOUNTED__) return;
+      window.__STATIC_FALLBACK_LOADED__ = true;
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = '/static-build/app.css';
+      document.head.appendChild(link);
+
+      var script = document.createElement('script');
+      script.type = 'module';
+      script.src = '/static-build/app.js';
+      document.body.appendChild(script);
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        var root = document.getElementById('root');
+        if (!window.__APP_MOUNTED__ && (!root || !root.hasChildNodes())) {
+          window.__loadStaticFallback();
+        }
+      }, 900);
+    });
   </script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+  <script type="module" src="/src/main.tsx" onerror="window.__loadStaticFallback && window.__loadStaticFallback()"></script>
 </body>
 </html>

@@ -2503,3 +2503,28 @@ td.auto {
     color: #000 !important;
   }
 }
+
+/* ============ WCAG ACCESSIBILITY: HIGH CONTRAST & REDUCE MOTION ============ */
+html[data-high-contrast="true"] {
+  --ink: #000000;
+  --ink2: #111111;
+  --line: #222222;
+  --glass-border: #111111;
+}
+
+html[data-high-contrast="true"][data-theme="dark"] {
+  --ink: #FFFFFF;
+  --ink2: #F0F5F2;
+  --line: #00F5D4;
+  --glass-border: #00F5D4;
+}
+
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+

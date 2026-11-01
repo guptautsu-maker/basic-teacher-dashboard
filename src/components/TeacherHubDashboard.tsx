@@ -40,6 +40,11 @@ import {
 } from '../utils/privacyAndSecurityManager';
 import { HeadAdminOversightView } from './HeadAdminOversightView';
 import { SettingsModal } from './SettingsModal';
+import { DemoAndQaModal } from './DemoAndQaModal';
+import {
+  getStoredAccessibilityPreferences,
+  applyAccessibilityPreferencesToDom,
+} from '../utils/demoAndQaManager';
 
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
@@ -259,7 +264,12 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
     'general' | 'school' | 'notifications' | 'privacy' | 'backup'
   >('general');
 
+  // Demo Teacher Profile, QA Test Checklist & Accessibility Hub Modal State
+  const [isDemoQaOpen, setIsDemoQaOpen] = useState(false);
+  const [demoQaTab, setDemoQaTab] = useState<'demo' | 'qa' | 'a11y' | 'readme'>('demo');
+
   useEffect(() => {
+    applyAccessibilityPreferencesToDom(getStoredAccessibilityPreferences());
     const syncSettings = () => {
       setAppSettings(getStoredAppSettings());
     };
@@ -650,16 +660,45 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
           </div>
         </div>
 
-        {/* Right: Quick Action Buttons for DPDP Notice, Backup/Restore & Settings */}
+        {/* Right: Quick Action Buttons for Demo/QA, Accessibility, DPDP Notice, Backup/Restore & Settings */}
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <button
+            type="button"
+            onClick={() => {
+              setDemoQaTab('demo');
+              setIsDemoQaOpen(true);
+            }}
+            className="px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 dark:hover:bg-amber-900/70 border border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-200 text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition-all"
+            title="डेमो शिक्षक प्रोफ़ाइल (2 कक्षाएं, 10 कार्य, 3 पोर्टल, 4 आदेश, 2 बैठकें, 2 प्रशिक्षण, 3 ड्यूटी) व 6-सूत्रीय QA परीक्षण"
+            aria-label="डेमो शिक्षक प्रोफ़ाइल एवं QA परीक्षण चेकलिस्ट खोलें"
+          >
+            <span>🎯</span>
+            <span>डेमो प्रोफ़ाइल व QA परीक्षण</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setDemoQaTab('a11y');
+              setIsDemoQaOpen(true);
+            }}
+            className="px-3 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 dark:hover:bg-teal-900/60 border border-teal-300 dark:border-teal-800 text-teal-900 dark:text-teal-200 text-xs font-bold flex items-center gap-1.5 transition-all"
+            title="बड़े फ़ॉन्ट (A+ / A++), उच्च कंट्रास्ट और स्क्रीन रीडर सुगम्यता जाँच"
+            aria-label="बड़े फ़ॉन्ट और सुगम्यता नियंत्रण खोलें"
+          >
+            <span>♿</span>
+            <span>A+ फ़ॉन्ट व सुगम्यता</span>
+          </button>
+
           <button
             type="button"
             onClick={() => openSettingsWithTab('privacy')}
             className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-all"
             title="DPDP Act 2023 छात्र डेटा न्यूनतमीकरण एवं जीरो-आधार/पासवर्ड नीति"
+            aria-label="DPDP Act 2023 डेटा गोपनीयता नोटिस खोलें"
           >
             <span>🔒</span>
-            <span>DPDP गोपनीयता नोटिस (2023)</span>
+            <span>DPDP गोपनीयता (2023)</span>
           </button>
 
           <button
@@ -667,15 +706,17 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             onClick={() => openSettingsWithTab('backup')}
             className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/60 border border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200 text-xs font-bold flex items-center gap-1.5 transition-all"
             title="लोकल JSON बैकअप डाउनलोड व रीस्टोर (Export & Import)"
+            aria-label="लोकल JSON बैकअप व रीस्टोर खोलें"
           >
             <span>💾</span>
-            <span>बैकअप व रीस्टोर (JSON)</span>
+            <span>बैकअप (JSON)</span>
           </button>
 
           <button
             type="button"
             onClick={() => openSettingsWithTab('general')}
             className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 dark:bg-teal-600 dark:hover:bg-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+            aria-label="ऐप सेटिंग्स खोलें"
           >
             <span>⚙️</span>
             <span>सेटिंग्स (Settings)</span>
@@ -1861,6 +1902,23 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
         }}
         onToast={onToast}
         initialTab={settingsTab}
+      />
+
+      {/* Demo Teacher Profile, 6-Category QA Checklist & Accessibility Hub Modal */}
+      <DemoAndQaModal
+        isOpen={isDemoQaOpen}
+        onClose={() => setIsDemoQaOpen(false)}
+        initialTab={demoQaTab}
+        onDemoLoaded={(dataset) => {
+          setTasks(dataset.tasks);
+          setDuties(dataset.duties);
+          setMeetings(dataset.meetings);
+          setTrainings(dataset.trainings);
+          setGovtOrders(dataset.govtOrders);
+          setAppSettings(dataset.settings);
+          window.dispatchEvent(new Event('storage'));
+        }}
+        onToast={onToast}
       />
     </div>
   );
