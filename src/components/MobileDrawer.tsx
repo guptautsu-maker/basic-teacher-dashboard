@@ -1,15 +1,31 @@
 import React from 'react';
 import { UserProfile } from '../types';
+import { AppPage } from './Header';
 
 interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  activePage: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login';
-  setActivePage: (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login') => void;
+  activePage: AppPage;
+  setActivePage: (page: AppPage) => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
   unreadCount?: number;
 }
+
+const DRAWER_ITEMS: Array<{ id: AppPage; label: string }> = [
+  { id: 'dashboard', label: 'डैशबोर्ड (Teacher Hub)' },
+  { id: 'classes', label: 'मेरी कक्षाएं व उपस्थिति (My Classes)' },
+  { id: 'govt_orders', label: 'शासनादेश व परिपत्र (Govt Orders)' },
+  { id: 'portals', label: 'सरकारी पोर्टल (Portals & Apps)' },
+  { id: 'trainings', label: 'प्रशिक्षण (Trainings)' },
+  { id: 'duties', label: 'ड्यूटी रोस्टर (Duties)' },
+  { id: 'meetings', label: 'बैठकें (Meetings)' },
+  { id: 'safeguards', label: 'कार्य समीक्षा व रिपोर्ट (Safeguards)' },
+  { id: 'rollover', label: 'वार्षिक सत्र परिवर्तन (Session Rollover)' },
+  { id: 'notifications', label: 'सूचना केंद्र (Notifications)' },
+  { id: 'sheets', label: 'स्कूल शीट्स (Sheets)' },
+  { id: 'home', label: 'मुख्य पृष्ठ (Home)' },
+];
 
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   isOpen,
@@ -20,163 +36,75 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   onLogout,
   unreadCount = 0,
 }) => {
-  const handleNavigate = (page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login') => {
+  const handleNavigate = (page: AppPage) => {
     setActivePage(page);
     onClose();
   };
 
   return (
-    <div className={`mobile-drawer ${isOpen ? 'open' : ''}`}>
+    <div
+      className={`mobile-drawer ${isOpen ? 'open' : ''}`}
+      aria-hidden={!isOpen}
+    >
       <div className="drawer-overlay" onClick={onClose} />
-      <nav className="drawer-panel" aria-label="Mobile navigation">
+      <nav className="drawer-panel" aria-label="मोबाइल नेविगेशन (Mobile navigation)">
         <div className="drawer-head">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg viewBox="0 0 64 64" width="28" height="28" aria-hidden="true">
-              <path d="M32 14C24 8 12 8 6 11v35c6-3 18-3 26 3z" fill="#0D5B49" opacity=".9" />
-              <path d="M32 14c8-6 20-6 26-3v35c-6-3-18-3-26 3z" fill="#00B39B" opacity=".75" />
-              <circle cx="32" cy="4" r="4" fill="#9B5DE5" />
-            </svg>
-            <strong>मेनू</strong>
-          </div>
-          <button className="drawer-close" onClick={onClose} aria-label="Close menu">
+          <strong>मेनू (Menu)</strong>
+          <button
+            type="button"
+            className="drawer-close"
+            onClick={onClose}
+            aria-label="मेनू बंद करें (Close menu)"
+          >
             ✕
           </button>
         </div>
 
-        <button
-          className={`drawer-link ${activePage === 'home' ? 'active' : ''}`}
-          onClick={() => handleNavigate('home')}
-        >
-          🏠 Home
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'dashboard' ? 'active' : ''}`}
-          onClick={() => handleNavigate('dashboard')}
-        >
-          ⚡ Teacher Hub (मुख्य डैशबोर्ड)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'safeguards' ? 'active' : ''}`}
-          onClick={() => handleNavigate('safeguards')}
-        >
-          🛡️ Safeguards (कार्य सुरक्षा व समीक्षा)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'classes' ? 'active' : ''}`}
-          onClick={() => handleNavigate('classes')}
-        >
-          📚 My Classes (मेरी कक्षाएं व उपस्थिति)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'rollover' ? 'active' : ''}`}
-          onClick={() => handleNavigate('rollover')}
-        >
-          🔄 Session Rollover (वार्षिक सत्र परिवर्तन)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'notifications' ? 'active' : ''}`}
-          onClick={() => handleNavigate('notifications')}
-        >
-          🔔 Notification Center (सूचना केंद्र)
-          {unreadCount > 0 && (
-            <span
-              style={{
-                marginLeft: 'auto',
-                backgroundColor: '#EF4444',
-                color: '#fff',
-                fontSize: '11px',
-                fontWeight: 800,
-                borderRadius: '9999px',
-                padding: '1px 7px',
-              }}
+        <div className="drawer-list">
+          {DRAWER_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`drawer-link ${activePage === item.id ? 'active' : ''}`}
+              onClick={() => handleNavigate(item.id)}
             >
-              {unreadCount}
-            </span>
-          )}
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'trainings' ? 'active' : ''}`}
-          onClick={() => handleNavigate('trainings')}
-        >
-          🎓 Trainings (प्रशिक्षण व दीक्षा)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'duties' ? 'active' : ''}`}
-          onClick={() => handleNavigate('duties')}
-        >
-          🛡️ Duties (विशेष दायित्व व रोस्टर)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'portals' ? 'active' : ''}`}
-          onClick={() => handleNavigate('portals')}
-        >
-          🌐 Portals & Apps (सरकारी पोर्टल)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'govt_orders' ? 'active' : ''}`}
-          onClick={() => handleNavigate('govt_orders')}
-        >
-          📜 Govt Orders (शासनादेश व आदेश)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'meetings' ? 'active' : ''}`}
-          onClick={() => handleNavigate('meetings')}
-        >
-          🤝 Meetings (बैठकें व गुरु-गोष्ठी)
-        </button>
-        <button
-          className={`drawer-link ${activePage === 'sheets' ? 'active' : ''}`}
-          onClick={() => handleNavigate('sheets')}
-        >
-          📋 School Sheets
-        </button>
-        <button
-          className="drawer-link"
-          onClick={() => {
-            handleNavigate('dashboard');
-            setTimeout(() => {
-              const el = document.getElementById('quick-notes');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          }}
-        >
-          📌 Quick Notes
-        </button>
+              <span>{item.label}</span>
+              {item.id === 'notifications' && unreadCount > 0 && (
+                <span className="drawer-badge">{unreadCount}</span>
+              )}
+            </button>
+          ))}
+        </div>
 
         <div className="drawer-divider" />
 
         {currentUser ? (
-          <>
-            <div style={{ padding: '8px 14px', fontSize: '0.85rem', color: 'var(--ink2)' }}>
-              लॉगिन: <strong>{currentUser.name}</strong>
-              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{currentUser.email}</div>
+          <div className="drawer-footer">
+            <div className="drawer-user-info">
+              <strong>{currentUser.name}</strong>
+              <span>{currentUser.email}</span>
             </div>
             <button
-              className="drawer-link"
+              type="button"
+              className="drawer-link drawer-logout"
               onClick={() => {
                 onLogout();
                 onClose();
               }}
-              style={{ color: 'var(--danger)' }}
             >
-              🚪 लॉगआउट करें
+              लॉगआउट करें (Logout)
             </button>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="drawer-footer">
             <button
+              type="button"
               className={`drawer-link ${activePage === 'login' ? 'active' : ''}`}
               onClick={() => handleNavigate('login')}
             >
-              🔐 Login / Sign Up
+              लॉगिन / साइन अप (Login)
             </button>
-            <button
-              className="btn btn-neon drawer-cta"
-              onClick={() => handleNavigate('dashboard')}
-            >
-              Start Free →
-            </button>
-          </>
+          </div>
         )}
       </nav>
     </div>

@@ -718,94 +718,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
 
   return (
     <main className="dash">
-      {/* Welcome Bar */}
-      <div className="welcome-bar">
-        <div>
-          <h1>
-            नमस्ते, <span>{teacherName}</span>! 👋
+      {/* Minimal Top Bar: Greeting, Date & Mode Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-[#D3DDD6] dark:border-[#2B3C34]">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h1 className="text-lg sm:text-xl font-bold text-[#13231C] dark:text-[#E7F0EA] m-0">
+            नमस्ते, {teacherName}
           </h1>
-          <div style={{ fontSize: '0.88rem', color: 'var(--ink2)', marginTop: '2px' }}>
-            हर सेक्शन को आप जोड़, संपादित या हटा सकते हैं। सभी नोट्स व कार्य स्थिति सुरक्षित रहती है।
+          <span className="text-xs text-[#52645B] dark:text-[#9DB0A5]">
+            {dateText}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="inline-flex items-center p-1 rounded-lg bg-[#E6EDE8] dark:bg-[#1E2E26]">
+            <button
+              type="button"
+              onClick={() => setDashboardMode('teacher_hub')}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                dashboardMode === 'teacher_hub'
+                  ? 'bg-white dark:bg-[#16231D] text-[#0D5B49] dark:text-[#00F5D4] shadow-xs'
+                  : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+              }`}
+            >
+              मुख्य डैशबोर्ड
+            </button>
+            <button
+              type="button"
+              onClick={() => setDashboardMode('portals')}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                dashboardMode === 'portals'
+                  ? 'bg-white dark:bg-[#16231D] text-[#0D5B49] dark:text-[#00F5D4] shadow-xs'
+                  : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C]'
+              }`}
+            >
+              क्लासिक टूल्स व नोट्स
+            </button>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span className="date-chip">{dateText}</span>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={handleResetAllDefaults}
-            title="डिफ़ॉल्ट सेटिंग्स पुनः लोड करें"
-            style={{ fontSize: '0.8rem', padding: '6px 12px' }}
-          >
-            🔄 रीसेट
-          </button>
-        </div>
-      </div>
-
-      {/* View Switcher: Teacher Hub vs Portals Directory */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          padding: '6px',
-          borderRadius: '16px',
-          background: 'var(--surface)',
-          border: '1px solid var(--glass-border)',
-          marginBottom: '24px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setDashboardMode('teacher_hub')}
-          style={{
-            flex: 1,
-            padding: '12px 16px',
-            borderRadius: '12px',
-            border: 'none',
-            fontFamily: 'var(--font-b)',
-            fontSize: '15px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.25s ease',
-            background: dashboardMode === 'teacher_hub' ? 'var(--brand)' : 'transparent',
-            color: dashboardMode === 'teacher_hub' ? '#ffffff' : 'var(--ink2)',
-            boxShadow: dashboardMode === 'teacher_hub' ? '0 4px 14px rgba(13,91,73,0.35)' : 'none',
-          }}
-        >
-          <span style={{ fontSize: '18px' }}>⚡</span>
-          <span>मुख्य शिक्षक हब (Teacher Hub)</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setDashboardMode('portals')}
-          style={{
-            flex: 1,
-            padding: '12px 16px',
-            borderRadius: '12px',
-            border: 'none',
-            fontFamily: 'var(--font-b)',
-            fontSize: '15px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.25s ease',
-            background: dashboardMode === 'portals' ? 'var(--brand)' : 'transparent',
-            color: dashboardMode === 'portals' ? '#ffffff' : 'var(--ink2)',
-            boxShadow: dashboardMode === 'portals' ? '0 4px 14px rgba(13,91,73,0.35)' : 'none',
-          }}
-        >
-          <span style={{ fontSize: '18px' }}>📂</span>
-          <span>पोर्टल व टूल्स निर्देशिका (Portals Directory)</span>
-        </button>
       </div>
 
       {dashboardMode === 'teacher_hub' ? (
