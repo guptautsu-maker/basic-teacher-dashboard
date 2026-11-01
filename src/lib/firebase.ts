@@ -44,3 +44,31 @@ export const signInWithGoogleForCloudSync = async (): Promise<{
     idToken,
   };
 };
+
+export const attemptFirebaseGooglePopupLogin = async (): Promise<{
+  ok: boolean;
+  user?: {
+    uid: string;
+    email: string;
+    displayName: string;
+    idToken?: string;
+  };
+  fallbackNeeded?: boolean;
+  errorCode?: string;
+}> => {
+  try {
+    const res = await signInWithGoogleForCloudSync();
+    if (res) {
+      return { ok: true, user: res };
+    }
+    return { ok: false, fallbackNeeded: true };
+  } catch (err: any) {
+    const code = String(err?.code || err?.message || 'auth/popup-blocked');
+    return {
+      ok: false,
+      fallbackNeeded: true,
+      errorCode: code,
+    };
+  }
+};
+

@@ -51,6 +51,11 @@ import {
   applyAccessibilityPreferencesToDom,
 } from '../utils/demoAndQaManager';
 import { PrintableSummaryPdfModal } from './PrintableSummaryPdfModal';
+import { TaskCompletionChartWidget } from './TaskCompletionChartWidget';
+import { PinSecurityModal } from './PinSecurityModal';
+import { PWAInstallButton } from './PWAInstallButton';
+import { getStoredPinRecord } from '../utils/pinAndGoogleAuthManager';
+import { setStoredUser } from '../supabase';
 
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
@@ -280,6 +285,9 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   const [isDemoQaOpen, setIsDemoQaOpen] = useState(false);
   const [demoQaTab, setDemoQaTab] = useState<'demo' | 'qa' | 'a11y' | 'readme'>('demo');
   const [isPrintablePdfOpen, setIsPrintablePdfOpen] = useState(false);
+  const [isPinSecurityOpen, setIsPinSecurityOpen] = useState(false);
+  const [pinSecurityMode, setPinSecurityMode] = useState<'setup_pin' | 'google_login' | 'lock_screen'>('setup_pin');
+  const [hasPinConfigured, setHasPinConfigured] = useState<boolean>(() => Boolean(getStoredPinRecord()));
 
   useEffect(() => {
     applyAccessibilityPreferencesToDom(getStoredAccessibilityPreferences());
@@ -565,6 +573,21 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             </button>
 
             <button
+              id="open-pin-security-modal-btn"
+              type="button"
+              onClick={() => {
+                setPinSecurityMode('setup_pin');
+                setIsPinSecurityOpen(true);
+              }}
+              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34] text-[#0D5B49] dark:text-[#3FBF9B] font-semibold text-xs transition-colors min-h-[40px]"
+              aria-label="Google लॉगिन एवं 4-अंकीय पिन सेटअप खोलें"
+            >
+              {hasPinConfigured ? '🔢 4-Digit PIN (सक्रिय)' : '🔐 Google व 4-Digit PIN'}
+            </button>
+
+            <PWAInstallButton variant="button" onToast={onToast} />
+
+            <button
               type="button"
               onClick={() => openSettingsWithTab('general')}
               className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#E6EDE8] dark:hover:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] font-medium text-xs transition-colors min-h-[40px]"
@@ -677,6 +700,18 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
           </button>
         </div>
       </section>
+
+      {/* ========================================================= */}
+      {/* 2B. RECHARTS 30-DAY TASK COMPLETION BY CATEGORY WIDGET    */}
+      {/* ========================================================= */}
+      <TaskCompletionChartWidget
+        tasks={tasks}
+        activeFilterCategory={activeFilterCategory}
+        onSelectCategory={(cat) => {
+          setActiveFilterCategory(cat);
+          setActiveSectionTab('today');
+        }}
+      />
 
       {/* ========================================================= */}
       {/* 3. FOCUSED VIEW TABS (AVOIDS VISUAL OVERLOAD)             */}
@@ -1577,6 +1612,23 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
         initialCategoryFilter={activeFilterCategory}
         initialStatusFilter={activeFilterStatus}
         onToast={onToast}
+      />
+
+      {/* Google Login & 4-Digit PIN Security Modal */}
+      <PinSecurityModal
+        isOpen={isPinSecurityOpen}
+        onClose={() => {
+          setIsPinSecurityOpen(false);
+          setHasPinConfigured(Boolean(getStoredPinRecord()));
+        }}
+        currentUser={currentUser || null}
+        onUserAuthenticated={(profile) => {
+          setStoredUser(profile);
+          setHasPinConfigured(Boolean(getStoredPinRecord()));
+          window.dispatchEvent(new Event('storage'));
+        }}
+        onToast={onToast}
+        initialMode={pinSecurityMode}
       />
     </div>
   );

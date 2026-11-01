@@ -55,6 +55,7 @@ import {
   normalizeTheme,
   THEME_STORAGE_KEY,
 } from './utils/themeManager';
+import { OfflineIndicator } from './components/PWAInstallButton';
 
 export const App: React.FC = () => {
   // Theme management — applies synchronously to <html> and <body> so all dynamic Tailwind dark:* and CSS token elements update immediately
@@ -687,6 +688,7 @@ export const App: React.FC = () => {
         initialTab={settingsModalTab}
       />
 
+      <OfflineIndicator />
       <Toast message={toastMessage} />
     </div>
   );

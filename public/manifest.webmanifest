@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "Basic Teacher Dashboard — Sarkari Mitra",
+  "short_name": "TeacherHub",
+  "description": "All-in-one Progressive Web App (PWA) for basic teachers in India. Manage daily tasks, MDM, attendance, govt orders, trainings, and offline backups.",
+  "theme_color": "#0D5B49",
+  "background_color": "#F4F7F5",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
