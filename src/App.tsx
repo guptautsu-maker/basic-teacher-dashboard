@@ -56,6 +56,8 @@ import {
   THEME_STORAGE_KEY,
 } from './utils/themeManager';
 import { OfflineIndicator } from './components/PWAInstallButton';
+import { SupabaseKeepAliveManager } from './components/SupabaseKeepAliveManager';
+import { MobileBottomNav } from './components/MobileBottomNav';
 
 export const App: React.FC = () => {
   // Theme management — applies synchronously to <html> and <body> so all dynamic Tailwind dark:* and CSS token elements update immediately
@@ -127,9 +129,10 @@ export const App: React.FC = () => {
 
   // Page Routing
   const [activePage, setActivePage] = useState<
-    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login'
+    'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'keepalive' | 'login'
   >(() => {
     const hash = window.location.hash.toLowerCase();
+    if (hash.includes('keepalive') || hash.includes('supabase') || hash.includes('cron')) return 'keepalive';
     if (hash.includes('dashboard')) return 'dashboard';
     if (hash.includes('safeguard') || hash.includes('review') || hash.includes('summary')) return 'safeguards';
     if (hash.includes('rollover') || hash.includes('session')) return 'rollover';
@@ -148,7 +151,8 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
-      if (hash.includes('dashboard')) setActivePage('dashboard');
+      if (hash.includes('keepalive') || hash.includes('supabase') || hash.includes('cron')) setActivePage('keepalive');
+      else if (hash.includes('dashboard')) setActivePage('dashboard');
       else if (hash.includes('safeguard') || hash.includes('review') || hash.includes('summary')) setActivePage('safeguards');
       else if (hash.includes('rollover') || hash.includes('session')) setActivePage('rollover');
       else if (hash.includes('class')) setActivePage('classes');
@@ -168,12 +172,14 @@ export const App: React.FC = () => {
   }, []);
 
   const navigateTo = (
-    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'login'
+    page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'keepalive' | 'login'
   ) => {
     setActivePage(page);
     window.location.hash =
       page === 'home'
         ? ''
+        : page === 'keepalive'
+        ? 'keepalive'
         : page === 'safeguards'
         ? 'safeguards'
         : page === 'govt_orders'
@@ -645,10 +651,26 @@ export const App: React.FC = () => {
                   />
                 </div>
               )}
+              {activePage === 'keepalive' && (
+                <SupabaseKeepAliveManager onToast={showToast} />
+              )}
             </main>
             <Footer
               variant="slim"
               onNavigate={navigateTo}
+              onToast={showToast}
+            />
+            <MobileBottomNav
+              activePage={activePage}
+              setActivePage={navigateTo}
+              unreadCount={reminderService.unreadCount}
+              onOpenSettings={(tab = 'general') => {
+                setSettingsModalTab(tab);
+                setIsSettingsModalOpen(true);
+              }}
+              onOpenSearch={() => setIsGlobalSearchOpen(true)}
+              theme={theme}
+              toggleTheme={toggleTheme}
               onToast={showToast}
             />
           </div>

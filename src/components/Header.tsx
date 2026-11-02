@@ -15,6 +15,7 @@ export type AppPage =
   | 'classes'
   | 'rollover'
   | 'safeguards'
+  | 'keepalive'
   | 'login';
 
 interface HeaderProps {
@@ -66,6 +67,7 @@ export const SIDEBAR_GROUPS: Array<{
   {
     groupTitle: 'समीक्षा व प्रबंधन (Admin)',
     items: [
+      { id: 'keepalive', icon: '🔋', label: 'Supabase Keep-Alive' },
       { id: 'safeguards', icon: '✅', label: 'कार्य समीक्षा (Safeguards)' },
       { id: 'rollover', icon: '🔄', label: 'सत्र परिवर्तन (Rollover)' },
       { id: 'notifications', icon: '🔔', label: 'सूचना केंद्र (Alerts)' },
@@ -87,6 +89,7 @@ export const PAGE_TITLES: Record<AppPage, { title: string; subtitle: string }> =
   safeguards: { title: 'कार्य समीक्षा व सुरक्षा (Safeguards)', subtitle: 'दैनिक चेकलिस्ट, साप्ताहिक सारांश व पीडीएफ रिपोर्ट' },
   rollover: { title: 'वार्षिक सत्र परिवर्तन (Session Rollover)', subtitle: 'छात्र प्रोन्नति व नए शैक्षणिक सत्र की तैयारी' },
   notifications: { title: 'सूचना केंद्र (Notifications)', subtitle: 'आगामी डेडलाइन व रिमाइंडर अलर्ट' },
+  keepalive: { title: 'Supabase Keep-Alive & Cron', subtitle: 'डेटाबेस REST API पिंग व GitHub Actions वर्कफ़्लो' },
 };
 
 /**

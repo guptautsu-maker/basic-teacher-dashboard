@@ -14,6 +14,7 @@ interface MobileDrawerProps {
 
 const DRAWER_ITEMS: Array<{ id: AppPage; label: string }> = [
   { id: 'dashboard', label: 'डैशबोर्ड (Teacher Hub)' },
+  { id: 'keepalive', label: '🔋 Supabase Keep-Alive & Cron' },
   { id: 'classes', label: 'मेरी कक्षाएं व उपस्थिति (My Classes)' },
   { id: 'govt_orders', label: 'शासनादेश व परिपत्र (Govt Orders)' },
   { id: 'portals', label: 'सरकारी पोर्टल (Portals & Apps)' },

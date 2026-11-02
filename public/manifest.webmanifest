@@ -2,13 +2,14 @@
   "id": "/",
   "name": "Basic Teacher Dashboard — Sarkari Mitra",
   "short_name": "TeacherHub",
-  "description": "All-in-one Progressive Web App (PWA) for basic teachers in India. Manage daily tasks, MDM, attendance, govt orders, trainings, and offline backups.",
+  "description": "All-in-one Native-like Android Progressive Web App (PWA) for basic teachers in India & Supabase Keep-Alive Studio.",
   "theme_color": "#0D5B49",
   "background_color": "#F4F7F5",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "start_url": "/",
   "scope": "/",
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/pwa-192x192.png",
@@ -27,6 +28,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Teacher Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open daily teacher tasks and analytics",
+      "url": "/#dashboard",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Supabase Keep-Alive",
+      "short_name": "Keep-Alive",
+      "description": "Ping Supabase REST API and download GitHub Actions YAML",
+      "url": "/#keepalive",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Classes",
+      "short_name": "Classes",
+      "description": "Attendance and student register",
+      "url": "/#classes",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
