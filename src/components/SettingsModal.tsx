@@ -303,17 +303,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
-                    { key: 'bilingual', title: 'द्विभाषी (Bilingual)', desc: 'हिंदी + अंग्रेजी दोनों साथ (अनुशंसित)' },
-                    { key: 'hi', title: 'हिंदी (Hindi)', desc: 'मुख्य रूप से देवनागरी हिंदी में' },
-                    { key: 'en', title: 'English', desc: 'English first with Hindi hints' },
+                    { key: 'hi', title: 'हिंदी (सरल हिंदी)', desc: 'पूरा ऐप आसान हिंदी भाषा में देखें' },
+                    { key: 'en', title: 'English (अंग्रेजी)', desc: 'Convert entire app into simple English' },
+                    { key: 'bilingual', title: 'द्विभाषी (Bilingual)', desc: 'हिंदी + English दोनों साथ' },
                   ].map((lang) => (
                     <button
                       key={lang.key}
                       type="button"
-                      onClick={() =>
-                        setFormSettings((prev) => ({ ...prev, language: lang.key as AppLanguage }))
-                      }
-                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                      data-testid={`settings-lang-${lang.key}`}
+                      onClick={() => {
+                        const updated = {
+                          ...formSettings,
+                          language: lang.key as AppLanguage,
+                        };
+                        setFormSettings(updated);
+                        onUpdateSettings(updated);
+                        try {
+                          localStorage.setItem('btd-lang', lang.key === 'en' ? 'en' : 'hi');
+                          document.documentElement.lang = lang.key === 'en' ? 'en' : 'hi';
+                          document.documentElement.setAttribute(
+                            'data-lang',
+                            lang.key === 'en' ? 'en' : 'hi'
+                          );
+                          window.dispatchEvent(new CustomEvent('th-settings-updated'));
+                          window.dispatchEvent(
+                            new CustomEvent('th-language-changed', {
+                              detail: { language: lang.key === 'en' ? 'en' : 'hi' },
+                            })
+                          );
+                        } catch {
+                          // ignore
+                        }
+                        onToast(
+                          lang.key === 'en'
+                            ? '🌐 App language changed to English!'
+                            : '🌐 ऐप की भाषा हिंदी कर दी गई है!'
+                        );
+                      }}
+                      className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                         formSettings.language === lang.key
                           ? 'border-[#0D5B49] dark:border-[#00F5D4] bg-white dark:bg-[#1b2b23] shadow-md ring-2 ring-[#00F5D4]/40'
                           : 'border-gray-200 dark:border-gray-800 hover:bg-white/50 dark:hover:bg-gray-800/50'

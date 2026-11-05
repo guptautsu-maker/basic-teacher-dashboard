@@ -25,6 +25,7 @@ import { AddActionCardModal } from '../components/AddActionCardModal';
 import { AddWorkspaceToolModal } from '../components/AddWorkspaceToolModal';
 import { TeacherHubDashboard } from '../components/TeacherHubDashboard';
 import { PortalsManager } from '../components/PortalsManager';
+import { useAppLanguage } from '../utils/i18nManager';
 
 const NOTE_CATEGORIES: Record<
   QuickNote['category'],
@@ -78,13 +79,14 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNavigate }) => {
   // Main view toggle: 'teacher_hub' (default) vs 'portals'
   const [dashboardMode, setDashboardMode] = useState<'teacher_hub' | 'portals'>('teacher_hub');
+  const { isEn, t, tr } = useAppLanguage();
 
   // Date chip
   const [dateText, setDateText] = useState('');
   useEffect(() => {
     try {
       setDateText(
-        new Date().toLocaleDateString('hi-IN', {
+        new Date().toLocaleDateString(isEn ? 'en-IN' : 'hi-IN', {
           weekday: 'long',
           day: 'numeric',
           month: 'long',
@@ -92,9 +94,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
         })
       );
     } catch {
-      setDateText('आज');
+      setDateText(isEn ? 'Today' : 'आज');
     }
-  }, []);
+  }, [isEn]);
 
   // -------------------------------------------------------------
   // Section States (Work Status & Attached Notes for each section)
@@ -722,7 +724,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-[#D3DDD6] dark:border-[#2B3C34]">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h1 className="text-lg sm:text-xl font-bold text-[#13231C] dark:text-[#E7F0EA] m-0">
-            नमस्ते, {teacherName}
+            {t('🙏 नमस्ते,', '🙏 Hello,')} {tr(teacherName)}
           </h1>
           <span className="text-xs text-[#52645B] dark:text-[#9DB0A5]">
             {dateText}
@@ -740,7 +742,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
                   : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
               }`}
             >
-              मुख्य डैशबोर्ड
+              {t('सरल डैशबोर्ड (Simple Home)', 'Simple Dashboard')}
             </button>
             <button
               type="button"
@@ -751,7 +753,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ currentUser, onToast, onNa
                   : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
               }`}
             >
-              क्लासिक टूल्स व नोट्स
+              {t('व्हाट्सऐप, यूट्यूब व नोट्स', 'WhatsApp, YouTube & Notes')}
             </button>
           </div>
         </div>

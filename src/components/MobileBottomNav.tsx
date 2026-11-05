@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppPage } from './Header';
 import { usePWAInstall } from '../utils/usePWAInstall';
+import { useAppLanguage } from '../utils/i18nManager';
 
 interface MobileBottomNavProps {
   activePage: AppPage;
@@ -19,30 +20,32 @@ const PRIMARY_TABS: Array<{
   labelHi: string;
   labelEn: string;
 }> = [
-  { id: 'dashboard', icon: '⚡', labelHi: 'डैशबोर्ड', labelEn: 'Home' },
-  { id: 'classes', icon: '📚', labelHi: 'कक्षाएं', labelEn: 'Classes' },
-  { id: 'govt_orders', icon: '📜', labelHi: 'आदेश', labelEn: 'Orders' },
-  { id: 'keepalive', icon: '🔋', labelHi: 'Keep-Alive', labelEn: 'Supabase' },
+  { id: 'dashboard', icon: '⚡', labelHi: 'आज के काम', labelEn: 'Home' },
+  { id: 'classes', icon: '📚', labelHi: 'हाज़िरी', labelEn: 'Classes' },
+  { id: 'sheets', icon: '📋', labelHi: 'एमडीएम', labelEn: 'MDM' },
+  { id: 'portals', icon: '🌐', labelHi: 'पोर्टल', labelEn: 'Portals' },
 ];
 
 const ALL_ANDROID_APPS: Array<{
   id: AppPage;
   icon: string;
-  label: string;
-  sub: string;
+  labelHi: string;
+  labelEn: string;
+  subHi: string;
+  subEn: string;
 }> = [
-  { id: 'dashboard', icon: '⚡', label: 'डैशबोर्ड', sub: 'Teacher Hub' },
-  { id: 'keepalive', icon: '🔋', label: 'Keep-Alive', sub: 'Supabase Cron' },
-  { id: 'classes', icon: '📚', label: 'मेरी कक्षाएं', sub: 'उपस्थिति व छात्र' },
-  { id: 'govt_orders', icon: '📜', label: 'शासनादेश', sub: 'आदेश व PDF' },
-  { id: 'portals', icon: '🌐', label: 'सरकारी पोर्टल', sub: 'प्रेरणा, मानव संपदा' },
-  { id: 'trainings', icon: '🎓', label: 'प्रशिक्षण', sub: 'दीक्षा व कोर्स' },
-  { id: 'duties', icon: '🛡️', label: 'ड्यूटी रोस्टर', sub: 'MDM व सभा' },
-  { id: 'meetings', icon: '🤝', label: 'बैठकें', sub: 'PTM व SMC' },
-  { id: 'sheets', icon: '📋', label: 'स्कूल शीट्स', sub: 'पंजिका व तालिका' },
-  { id: 'safeguards', icon: '✅', label: 'कार्य समीक्षा', sub: 'रिपोर्ट व PDF' },
-  { id: 'rollover', icon: '🔄', label: 'सत्र परिवर्तन', sub: 'प्रोन्नति विज़ार्ड' },
-  { id: 'notifications', icon: '🔔', label: 'सूचना केंद्र', sub: 'रिमाइंडर अलर्ट' },
+  { id: 'dashboard', icon: '⚡', labelHi: 'आज के काम', labelEn: "Today's Work", subHi: 'मुख्य डैशबोर्ड', subEn: 'Main Dashboard' },
+  { id: 'classes', icon: '📚', labelHi: 'बच्चों की हाज़िरी', labelEn: 'My Classes', subHi: 'उपस्थिति व छात्र', subEn: 'Attendance & List' },
+  { id: 'sheets', icon: '📋', labelHi: 'एमडीएम व शीट्स', labelEn: 'MDM & Sheets', subHi: 'पंजिका व तालिका', subEn: 'School Registers' },
+  { id: 'portals', icon: '🌐', labelHi: 'सरकारी पोर्टल', labelEn: 'Govt Portals', subHi: 'प्रेरणा, मानव संपदा', subEn: 'Prerna, eHRMS' },
+  { id: 'govt_orders', icon: '📜', labelHi: 'शासनादेश', labelEn: 'Govt Orders', subHi: 'आदेश व PDF', subEn: 'Orders & Notices' },
+  { id: 'trainings', icon: '🎓', labelHi: 'प्रशिक्षण', labelEn: 'Trainings', subHi: 'दीक्षा व कोर्स', subEn: 'DIKSHA Courses' },
+  { id: 'duties', icon: '🛡️', labelHi: 'ड्यूटी रोस्टर', labelEn: 'Duty Roster', subHi: 'MDM व सभा', subEn: 'Daily Duties' },
+  { id: 'meetings', icon: '🤝', labelHi: 'बैठकें', labelEn: 'Meetings', subHi: 'PTM व SMC', subEn: 'PTM & SMC' },
+  { id: 'safeguards', icon: '📄', labelHi: 'पीडीएफ रिपोर्ट', labelEn: 'PDF Report', subHi: 'समीक्षा व प्रिंट', subEn: 'Print Summary' },
+  { id: 'notifications', icon: '🔔', labelHi: 'सूचना केंद्र', labelEn: 'Alerts', subHi: 'रिमाइंडर अलर्ट', subEn: 'Reminders' },
+  { id: 'rollover', icon: '🔄', labelHi: 'सत्र परिवर्तन', labelEn: 'New Session', subHi: 'छात्र प्रोन्नति', subEn: 'Promote Class' },
+  { id: 'keepalive', icon: '🔋', labelHi: 'Keep-Alive', labelEn: 'Keep-Alive', subHi: 'Supabase Cron', subEn: 'Supabase Cron' },
 ];
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
@@ -57,6 +60,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 }) => {
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const { isInstallable, isInstalled, install } = usePWAInstall();
+  const { isEn, toggleLanguage, t } = useAppLanguage();
 
   const handleSelectPage = (page: AppPage) => {
     setActivePage(page);
@@ -67,14 +71,24 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     if (isInstallable) {
       const ok = await install();
       if (ok) {
-        onToast?.('📲 Android होम स्क्रीन पर ऐप इंस्टॉल हो रहा है!');
+        onToast?.(
+          t(
+            '📲 Android होम स्क्रीन पर ऐप इंस्टॉल हो रहा है!',
+            '📲 Installing app on your Android Home Screen!'
+          )
+        );
       }
       return;
     }
-    onToast?.('📲 Chrome मेनू (⋮) → "Add to Home screen / Install app" चुनें');
+    onToast?.(
+      t(
+        '📲 Chrome मेनू (⋮) → "Add to Home screen / Install app" चुनें',
+        '📲 Tap Chrome Menu (⋮) → Select "Add to Home screen / Install app"'
+      )
+    );
   };
 
-  const isSecondaryPageActive = !PRIMARY_TABS.some((t) => t.id === activePage);
+  const isSecondaryPageActive = !PRIMARY_TABS.some((tItem) => tItem.id === activePage);
 
   return (
     <>
@@ -97,17 +111,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <div className="flex items-center justify-between px-1">
               <div>
                 <h3 className="text-base font-bold text-[#13231C] dark:text-[#E7F0EA]">
-                  📱 सभी ऐप्स व मॉड्यूल (Android Launcher)
+                  {t('📱 सभी सुविधाएँ (All School Tools)', '📱 All School Tools (App Launcher)')}
                 </h3>
                 <p className="text-xs text-[#52645B] dark:text-[#9DB0A5]">
-                  किसी भी मॉड्यूल पर टैप करके तुरंत खोलें
+                  {t('किसी भी बटन को दबाकर तुरंत खोलें', 'Tap any button below to open immediately')}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsLauncherOpen(false)}
                 className="w-8 h-8 rounded-full bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] font-bold text-xs flex items-center justify-center"
-                aria-label="बंद करें"
+                aria-label={t('बंद करें', 'Close')}
               >
                 ✕
               </button>
@@ -115,19 +129,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
             {/* Quick Android System Controls Row */}
             <div className="grid grid-cols-3 gap-2">
-              {onOpenSearch && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsLauncherOpen(false);
-                    onOpenSearch();
-                  }}
-                  className="p-2.5 rounded-2xl bg-[#F1F5F2] dark:bg-[#1E2E26] border border-[#D3DDD6] dark:border-[#2B3C34] flex items-center justify-center gap-1.5 text-xs font-bold text-[#13231C] dark:text-[#E7F0EA] active:scale-95 transition-transform"
-                >
-                  <span>🔍</span>
-                  <span>खोजें</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  toggleLanguage();
+                }}
+                className="p-2.5 rounded-2xl bg-[#DCEEE6] dark:bg-[#173A2F] border border-[#0D5B49] dark:border-[#3FBF9B] flex items-center justify-center gap-1.5 text-xs font-bold text-[#0D5B49] dark:text-[#3FBF9B] active:scale-95 transition-transform"
+              >
+                <span>🌐</span>
+                <span>{isEn ? 'हिंदी करें' : 'English'}</span>
+              </button>
+
               {toggleTheme && (
                 <button
                   type="button"
@@ -135,9 +147,14 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                   className="p-2.5 rounded-2xl bg-[#F1F5F2] dark:bg-[#1E2E26] border border-[#D3DDD6] dark:border-[#2B3C34] flex items-center justify-center gap-1.5 text-xs font-bold text-[#13231C] dark:text-[#E7F0EA] active:scale-95 transition-transform"
                 >
                   <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
-                  <span>{theme === 'dark' ? 'लाइट मोड' : 'डार्क मोड'}</span>
+                  <span>
+                    {theme === 'dark'
+                      ? t('लाइट मोड', 'Light Mode')
+                      : t('डार्क मोड', 'Dark Mode')}
+                  </span>
                 </button>
               )}
+
               {onOpenSettings && (
                 <button
                   type="button"
@@ -148,7 +165,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                   className="p-2.5 rounded-2xl bg-[#F1F5F2] dark:bg-[#1E2E26] border border-[#D3DDD6] dark:border-[#2B3C34] flex items-center justify-center gap-1.5 text-xs font-bold text-[#13231C] dark:text-[#E7F0EA] active:scale-95 transition-transform"
                 >
                   <span>⚙️</span>
-                  <span>सेटिंग्स</span>
+                  <span>{t('सेटिंग्स', 'Settings')}</span>
                 </button>
               )}
             </div>
@@ -170,10 +187,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                   >
                     <span className="text-xl leading-none">{item.icon}</span>
                     <span className="text-xs font-bold leading-tight line-clamp-1">
-                      {item.label}
+                      {isEn ? item.labelEn : item.labelHi}
                     </span>
                     <span className="text-[10px] text-[#52645B] dark:text-[#9DB0A5] line-clamp-1">
-                      {item.sub}
+                      {isEn ? item.subEn : item.subHi}
                     </span>
                     {item.id === 'notifications' && unreadCount > 0 && (
                       <span className="absolute top-1.5 right-1.5 px-1.5 py-0.2 rounded-full bg-red-600 text-white text-[10px] font-bold">
@@ -190,10 +207,16 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               <div className="p-3.5 rounded-2xl bg-[#0D5B49] text-white flex items-center justify-between gap-3">
                 <div className="space-y-0.5">
                   <div className="text-xs font-bold">
-                    📲 Native Android App की तरह इंस्टॉल करें
+                    {t(
+                      '📲 फोन पर ऐप की तरह इंस्टॉल करें',
+                      '📲 Install as Native Android App'
+                    )}
                   </div>
                   <div className="text-[11px] text-white/80">
-                    फुल-स्क्रीन स्टैंडअलोन मोड व ऑफ़लाइन एक्सेस
+                    {t(
+                      'बिना इंटरनेट भी चलेगा और होम स्क्रीन पर दिखेगा',
+                      'Works offline & launches full-screen from Home Screen'
+                    )}
                   </div>
                 </div>
                 <button
@@ -201,7 +224,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                   onClick={handleInstallNativeApp}
                   className="py-2 px-3 rounded-xl bg-white text-[#0D5B49] font-bold text-xs shrink-0 active:scale-95"
                 >
-                  इंस्टॉल करें
+                  {t('इंस्टॉल करें', 'Install App')}
                 </button>
               </div>
             )}
@@ -228,7 +251,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               <span className="android-nav-pill" aria-hidden="true">
                 {tab.icon}
               </span>
-              <span className="android-nav-label">{tab.labelHi}</span>
+              <span className="android-nav-label">
+                {isEn ? tab.labelEn : tab.labelHi}
+              </span>
             </button>
           );
         })}
@@ -247,7 +272,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               <span className="android-nav-badge">{unreadCount}</span>
             )}
           </span>
-          <span className="android-nav-label">सभी ऐप्स</span>
+          <span className="android-nav-label">
+            {t('सभी टूल्स', 'All Tools')}
+          </span>
         </button>
       </nav>
     </>

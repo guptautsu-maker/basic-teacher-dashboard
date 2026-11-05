@@ -1,6 +1,7 @@
 import React from 'react';
 import { UserProfile } from '../types';
 import { UserRole } from '../types/settingsAndPrivacy';
+import { useAppLanguage } from '../utils/i18nManager';
 
 export type AppPage =
   | 'home'
@@ -39,62 +40,139 @@ export interface SidebarNavItem {
   id: AppPage;
   icon: string;
   label: string;
+  labelEn: string;
   subLabel?: string;
 }
 
 export const SIDEBAR_GROUPS: Array<{
   groupTitle: string;
+  groupTitleEn: string;
   items: SidebarNavItem[];
 }> = [
   {
-    groupTitle: 'मुख्य कार्यक्षेत्र (Core)',
+    groupTitle: 'रोज़ के मुख्य काम (Daily Work)',
+    groupTitleEn: 'Daily School Work',
     items: [
-      { id: 'dashboard', icon: '⚡', label: 'डैशबोर्ड (Dashboard)' },
-      { id: 'classes', icon: '📚', label: 'मेरी कक्षाएं (Classes)' },
-      { id: 'govt_orders', icon: '📜', label: 'शासनादेश (Orders)' },
-      { id: 'portals', icon: '🌐', label: 'सरकारी पोर्टल (Portals)' },
+      { id: 'dashboard', icon: '⚡', label: 'आज के काम (Home)', labelEn: "Today's Work (Home)" },
+      { id: 'classes', icon: '📚', label: 'बच्चों की हाज़िरी (Classes)', labelEn: 'Attendance & Classes' },
+      { id: 'sheets', icon: '📋', label: 'एमडीएम व रजिस्टर (MDM)', labelEn: 'MDM & School Sheets' },
+      { id: 'portals', icon: '🌐', label: 'सरकारी पोर्टल (Portals)', labelEn: 'Govt Portals (Prerna/eHRMS)' },
+      { id: 'govt_orders', icon: '📜', label: 'सरकारी आदेश (Orders)', labelEn: 'Govt Orders & Notices' },
     ],
   },
   {
-    groupTitle: 'विद्यालय व अकादमिक (School)',
+    groupTitle: 'स्कूल की अन्य गतिविधियाँ',
+    groupTitleEn: 'School Activities',
     items: [
-      { id: 'trainings', icon: '🎓', label: 'प्रशिक्षण (Trainings)' },
-      { id: 'duties', icon: '🛡️', label: 'ड्यूटी रोस्टर (Duties)' },
-      { id: 'meetings', icon: '🤝', label: 'बैठकें (Meetings)' },
-      { id: 'sheets', icon: '📋', label: 'स्कूल शीट्स (Sheets)' },
+      { id: 'trainings', icon: '🎓', label: 'प्रशिक्षण (Trainings)', labelEn: 'Teacher Trainings' },
+      { id: 'duties', icon: '🛡️', label: 'ड्यूटी रोस्टर (Duties)', labelEn: 'School Duty Roster' },
+      { id: 'meetings', icon: '🤝', label: 'बैठकें (PTM / SMC)', labelEn: 'Meetings (PTM / SMC)' },
     ],
   },
   {
-    groupTitle: 'समीक्षा व प्रबंधन (Admin)',
+    groupTitle: 'रिपोर्ट व अन्य सुविधाएँ',
+    groupTitleEn: 'Reports & Extra Tools',
     items: [
-      { id: 'keepalive', icon: '🔋', label: 'Supabase Keep-Alive' },
-      { id: 'safeguards', icon: '✅', label: 'कार्य समीक्षा (Safeguards)' },
-      { id: 'rollover', icon: '🔄', label: 'सत्र परिवर्तन (Rollover)' },
-      { id: 'notifications', icon: '🔔', label: 'सूचना केंद्र (Alerts)' },
+      { id: 'safeguards', icon: '📄', label: 'पीडीएफ रिपोर्ट व समीक्षा', labelEn: 'PDF Report & Review' },
+      { id: 'notifications', icon: '🔔', label: 'रिमाइंडर अलर्ट (Alerts)', labelEn: 'Reminders & Alerts' },
+      { id: 'rollover', icon: '🔄', label: 'नया सत्र (Session Rollover)', labelEn: 'New Session Rollover' },
+      { id: 'keepalive', icon: '🔋', label: 'Supabase Keep-Alive', labelEn: 'Supabase Keep-Alive' },
     ],
   },
 ];
 
-export const PAGE_TITLES: Record<AppPage, { title: string; subtitle: string }> = {
-  home: { title: 'मुख्य पृष्ठ', subtitle: 'बेसिक शिक्षक डैशबोर्ड' },
-  login: { title: 'लॉगिन', subtitle: 'शिक्षक खाता प्रवेश' },
-  dashboard: { title: 'शिक्षक डैशबोर्ड (Teacher Hub)', subtitle: 'आज के कार्य, समय-सीमा व त्वरित स्थिति' },
-  classes: { title: 'मेरी कक्षाएं (My Classes)', subtitle: 'उपस्थिति, छात्र सूची व समय-सारणी' },
-  govt_orders: { title: 'शासनादेश (Govt Orders)', subtitle: 'महत्वपूर्ण आदेश, सारांश व कार्य बिंदु' },
-  portals: { title: 'सरकारी पोर्टल (Portals)', subtitle: 'प्रेरणा, मानव संपदा, यू-डायस व दीक्षा लिंक्स' },
-  trainings: { title: 'प्रशिक्षण (Trainings)', subtitle: 'दीक्षा व विभागीय प्रशिक्षण प्रगति' },
-  duties: { title: 'ड्यूटी रोस्टर (Duties)', subtitle: 'MDM, प्रार्थना सभा व साप्ताहिक विद्यालय ड्यूटी' },
-  meetings: { title: 'बैठकें (Meetings)', subtitle: 'SMC, PTM व संकुल बैठक एजेंडा व कार्यवृत्त' },
-  sheets: { title: 'स्कूल शीट्स (Sheets)', subtitle: 'प्रपत्र, रजिस्टर व उपयोगी तालिकाएं' },
-  safeguards: { title: 'कार्य समीक्षा व सुरक्षा (Safeguards)', subtitle: 'दैनिक चेकलिस्ट, साप्ताहिक सारांश व पीडीएफ रिपोर्ट' },
-  rollover: { title: 'वार्षिक सत्र परिवर्तन (Session Rollover)', subtitle: 'छात्र प्रोन्नति व नए शैक्षणिक सत्र की तैयारी' },
-  notifications: { title: 'सूचना केंद्र (Notifications)', subtitle: 'आगामी डेडलाइन व रिमाइंडर अलर्ट' },
-  keepalive: { title: 'Supabase Keep-Alive & Cron', subtitle: 'डेटाबेस REST API पिंग व GitHub Actions वर्कफ़्लो' },
+export const PAGE_TITLES: Record<
+  AppPage,
+  { title: string; subtitle: string; titleEn: string; subtitleEn: string }
+> = {
+  home: {
+    title: 'मुख्य पृष्ठ',
+    subtitle: 'सरल शिक्षक ऐप',
+    titleEn: 'Home',
+    subtitleEn: 'Simple Teacher App',
+  },
+  login: {
+    title: 'लॉगिन',
+    subtitle: 'शिक्षक खाता प्रवेश',
+    titleEn: 'Teacher Login',
+    subtitleEn: 'Sign in with Google or 4-Digit PIN',
+  },
+  dashboard: {
+    title: 'शिक्षक का सरल डैशबोर्ड',
+    subtitle: 'बड़े बटन दबाएँ और अपना रोज़ का काम आसानी से पूरा करें',
+    titleEn: 'Simple Teacher Dashboard',
+    subtitleEn: 'Tap any big button below to finish your daily school work easily',
+  },
+  classes: {
+    title: 'बच्चों की हाज़िरी व कक्षाएं',
+    subtitle: 'उपस्थिति लगाएं और छात्र सूची देखें',
+    titleEn: 'Attendance & My Classes',
+    subtitleEn: 'Mark daily student attendance and view class lists',
+  },
+  govt_orders: {
+    title: 'सरकारी आदेश (शासनादेश)',
+    subtitle: 'नए आदेश सरल भाषा में पढ़ें',
+    titleEn: 'Government Orders & Notices',
+    subtitleEn: 'Read important BSA/BEO orders and action points simply',
+  },
+  portals: {
+    title: 'सरकारी पोर्टल (1-क्लिक लिंक्स)',
+    subtitle: 'प्रेरणा, मानव संपदा, यू-डायस व दीक्षा सीधे खोलें',
+    titleEn: 'Government Portals (1-Click Open)',
+    subtitleEn: 'Open Prerna, Manav Sampada, UDISE+ and DIKSHA directly',
+  },
+  trainings: {
+    title: 'प्रशिक्षण (Trainings)',
+    subtitle: 'दीक्षा व विभागीय प्रशिक्षण प्रगति',
+    titleEn: 'Teacher Trainings',
+    subtitleEn: 'Track DIKSHA and departmental training progress',
+  },
+  duties: {
+    title: 'ड्यूटी रोस्टर (Duties)',
+    subtitle: 'MDM, प्रार्थना सभा व साप्ताहिक ड्यूटी',
+    titleEn: 'School Duty Roster',
+    subtitleEn: 'MDM, morning assembly and weekly school duties',
+  },
+  meetings: {
+    title: 'बैठकें (PTM / SMC)',
+    subtitle: 'अभिभावक व विद्यालय प्रबंध समिति बैठक रिकॉर्ड',
+    titleEn: 'Meetings (PTM & SMC)',
+    subtitleEn: 'Parent-Teacher and SMC meeting notes & agenda',
+  },
+  sheets: {
+    title: 'एमडीएम (MDM) व स्कूल रजिस्टर',
+    subtitle: 'मध्याह्न भोजन, उपस्थिति व ग्रांट शीट्स',
+    titleEn: 'MDM & School Registers',
+    subtitleEn: 'Mid-Day Meal, attendance and school grant sheets',
+  },
+  safeguards: {
+    title: 'पीडीएफ रिपोर्ट व कार्य समीक्षा',
+    subtitle: 'प्रिंटेबल सारांश व दैनिक चेकलिस्ट',
+    titleEn: 'PDF Report & Work Review',
+    subtitleEn: 'Printable summary report and daily checklist',
+  },
+  rollover: {
+    title: 'नए सत्र में छात्र प्रोन्नति',
+    subtitle: 'अगली कक्षा में बच्चों को प्रमोट करें',
+    titleEn: 'New Session Student Promotion',
+    subtitleEn: 'Promote students to the next class for the new academic year',
+  },
+  notifications: {
+    title: 'सूचना केंद्र (Reminders)',
+    subtitle: 'ज़रूरी काम के रिमाइंडर अलर्ट',
+    titleEn: 'Notifications & Reminders',
+    subtitleEn: 'Important deadline reminders and alerts',
+  },
+  keepalive: {
+    title: 'Supabase Keep-Alive & Cron',
+    subtitle: 'डेटाबेस REST API पिंग व GitHub Actions वर्कफ़्लो',
+    titleEn: 'Supabase Keep-Alive & Cron',
+    subtitleEn: 'Database REST API Ping & GitHub Actions Workflow',
+  },
 };
 
 /**
  * 1. Pre-Login Ultra-Minimalistic Top Header
- * Shown before login on public pages (Home / Login).
  */
 export const Header: React.FC<HeaderProps> = ({
   activePage,
@@ -104,6 +182,8 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onQuickEnterWorkspace,
 }) => {
+  const { isEn, toggleLanguage, t } = useAppLanguage();
+
   const scrollToSection = (sectionId: string) => {
     if (activePage !== 'home') {
       setActivePage('home');
@@ -132,7 +212,9 @@ export const Header: React.FC<HeaderProps> = ({
           </svg>
           <span className="header-logo-text">
             Teacher Hub
-            <span className="header-logo-sub">बेसिक शिक्षक डैशबोर्ड</span>
+            <span className="header-logo-sub">
+              {t('सरल शिक्षक ऐप', 'Simple Teacher App')}
+            </span>
           </span>
         </button>
 
@@ -143,31 +225,41 @@ export const Header: React.FC<HeaderProps> = ({
             className={`minimal-nav-link ${activePage === 'home' ? 'active' : ''}`}
             onClick={() => setActivePage('home')}
           >
-            मुख्य पृष्ठ
+            {t('मुख्य पृष्ठ', 'Home')}
           </button>
           <button
             type="button"
             className="minimal-nav-link"
             onClick={() => scrollToSection('features')}
           >
-            विशेषताएं
+            {t('विशेषताएं', 'Features')}
           </button>
           <button
             type="button"
             className="minimal-nav-link"
             onClick={() => scrollToSection('faq')}
           >
-            सवाल-जवाब
+            {t('सवाल-जवाब', 'FAQs')}
           </button>
         </nav>
 
-        {/* Right: Minimal Theme + Login + Primary CTA */}
+        {/* Right: Prominent 1-Click Language Toggle + Theme + CTA */}
         <div className="header-actions">
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            data-testid="public-lang-toggle-btn"
+            className="py-1.5 px-3 rounded-lg border-2 border-[#0D5B49] dark:border-[#3FBF9B] bg-[#DCEEE6]/60 dark:bg-[#173A2F] text-[#0D5B49] dark:text-[#3FBF9B] font-bold text-xs sm:text-sm cursor-pointer transition-all hover:bg-[#0D5B49] hover:text-white"
+            title={t('अंग्रेजी में बदलें (Switch to English)', 'हिंदी में बदलें (Switch to Hindi)')}
+          >
+            {isEn ? '🌐 हिंदी में देखें' : '🌐 English'}
+          </button>
+
           <button
             className="header-icon-btn"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            title={theme === 'dark' ? 'लाइट मोड' : 'डार्क मोड'}
+            title={theme === 'dark' ? t('लाइट मोड', 'Light Mode') : t('डार्क मोड', 'Dark Mode')}
             type="button"
           >
             {theme === 'dark' ? '☀️' : '🌙'}
@@ -179,7 +271,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="minimal-cta-btn"
               onClick={() => setActivePage('dashboard')}
             >
-              डैशबोर्ड खोलें →
+              {t('ऐप खोलें →', 'Open App →')}
             </button>
           ) : (
             <>
@@ -188,7 +280,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`header-user-btn ${activePage === 'login' ? 'active' : ''}`}
                 onClick={() => setActivePage('login')}
               >
-                लॉगिन
+                {t('लॉगिन', 'Login')}
               </button>
               <button
                 type="button"
@@ -197,7 +289,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onQuickEnterWorkspace || (() => setActivePage('login'))
                 }
               >
-                मुफ़्त शुरू करें →
+                {t('सीधे शुरू करें →', 'Start Now →')}
               </button>
             </>
           )}
@@ -209,7 +301,6 @@ export const Header: React.FC<HeaderProps> = ({
 
 /**
  * 2. Post-Login Vertical Left Sidebar
- * Shown on the left side after login / inside workspace modules.
  */
 export const WorkspaceSidebar: React.FC<HeaderProps> = ({
   activePage,
@@ -221,8 +312,10 @@ export const WorkspaceSidebar: React.FC<HeaderProps> = ({
   activeRole = 'teacher',
   onRoleChange,
 }) => {
+  const { isEn, toggleLanguage, t, tr } = useAppLanguage();
+
   return (
-    <aside className="app-left-sidebar" aria-label="मुख्य कार्यक्षेत्र मेनू (Left Sidebar)">
+    <aside className="app-left-sidebar" aria-label={t('मुख्य कार्यक्षेत्र मेनू', 'Main Workspace Menu')}>
       {/* Top Brand Header */}
       <div className="sidebar-brand-bar">
         <button
@@ -238,7 +331,9 @@ export const WorkspaceSidebar: React.FC<HeaderProps> = ({
           </svg>
           <span className="header-logo-text">
             Teacher Hub
-            <span className="header-logo-sub">शिक्षक कार्यक्षेत्र</span>
+            <span className="header-logo-sub">
+              {t('सरल शिक्षक ऐप', 'Simple Teacher App')}
+            </span>
           </span>
         </button>
       </div>
@@ -247,7 +342,9 @@ export const WorkspaceSidebar: React.FC<HeaderProps> = ({
       <nav className="sidebar-nav-scroll" aria-label="Main workspace menu">
         {SIDEBAR_GROUPS.map((group) => (
           <div key={group.groupTitle} className="sidebar-nav-group">
-            <div className="sidebar-group-label">{group.groupTitle}</div>
+            <div className="sidebar-group-label">
+              {isEn ? group.groupTitleEn : group.groupTitle}
+            </div>
             <div className="sidebar-group-items">
               {group.items.map((item) => {
                 const isActive = activePage === item.id;
@@ -261,7 +358,9 @@ export const WorkspaceSidebar: React.FC<HeaderProps> = ({
                     <span className="sidebar-nav-icon" aria-hidden="true">
                       {item.icon}
                     </span>
-                    <span className="sidebar-nav-text">{item.label}</span>
+                    <span className="sidebar-nav-text">
+                      {isEn ? item.labelEn : item.label}
+                    </span>
                     {item.id === 'notifications' && unreadCount > 0 && (
                       <span className="sidebar-badge">{unreadCount}</span>
                     )}
@@ -275,30 +374,27 @@ export const WorkspaceSidebar: React.FC<HeaderProps> = ({
 
       {/* Bottom User & Controls Footer */}
       <div className="sidebar-footer">
-        {/* Role Switcher + Settings Row */}
+        {/* 1-Click Language Switcher + Settings Row */}
         <div className="sidebar-footer-tools">
-          {onRoleChange && (
-            <button
-              type="button"
-              onClick={() =>
-                onRoleChange(activeRole === 'teacher' ? 'headmaster' : 'teacher')
-              }
-              className="sidebar-tool-btn"
-              title="भूमिका बदलें: शिक्षक / प्रधानाध्यापक"
-            >
-              <span>{activeRole === 'teacher' ? '🧑‍🏫' : '🏫'}</span>
-              <span>{activeRole === 'teacher' ? 'शिक्षक मोड' : 'प्रधानाध्यापक'}</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="sidebar-tool-btn font-bold text-[#0D5B49] dark:text-[#3FBF9B]"
+            title={t('Switch to English', 'हिंदी में बदलें')}
+          >
+            <span>🌐</span>
+            <span>{isEn ? 'हिंदी करें' : 'English'}</span>
+          </button>
+
           {onOpenSettings && (
             <button
               type="button"
               onClick={() => onOpenSettings('general')}
               className="sidebar-tool-btn"
-              title="सेटिंग्स व बैकअप"
+              title={t('सेटिंग्स व बैकअप', 'Settings & Backup')}
             >
               <span>⚙️</span>
-              <span>सेटिंग्स</span>
+              <span>{t('सेटिंग्स', 'Settings')}</span>
             </button>
           )}
         </div>
@@ -307,14 +403,16 @@ export const WorkspaceSidebar: React.FC<HeaderProps> = ({
         <div className="sidebar-user-card">
           <div className="sidebar-user-info">
             <div className="sidebar-user-avatar" aria-hidden="true">
-              {(currentUser?.name || 'शि')[0]}
+              {isEn ? 'R' : (currentUser?.name || 'शि')[0]}
             </div>
             <div className="sidebar-user-meta">
               <div className="sidebar-user-name">
-                {currentUser?.name || 'श्री राजेश कुमार शर्मा'}
+                {tr(currentUser?.name || 'श्री राजेश कुमार शर्मा')}
               </div>
               <div className="sidebar-user-sub">
-                {activeRole === 'teacher' ? 'सहायक अध्यापक' : 'प्रधानाध्यापक'}
+                {activeRole === 'teacher'
+                  ? t('सहायक अध्यापक', 'Assistant Teacher')
+                  : t('प्रधानाध्यापक', 'Headmaster')}
               </div>
             </div>
           </div>
@@ -322,12 +420,26 @@ export const WorkspaceSidebar: React.FC<HeaderProps> = ({
             type="button"
             className="sidebar-logout-btn"
             onClick={onLogout}
-            title="लॉगआउट करें और मुख्य पृष्ठ पर जाएं"
-            aria-label="लॉगआउट (Logout)"
+            title={t('लॉगआउट करें', 'Logout')}
+            aria-label={t('लॉगआउट (Logout)', 'Logout')}
           >
-            🚪 लॉगआउट
+            {t('🚪 लॉगआउट', '🚪 Logout')}
           </button>
         </div>
+
+        {onRoleChange && (
+          <button
+            type="button"
+            onClick={() =>
+              onRoleChange(activeRole === 'teacher' ? 'headmaster' : 'teacher')
+            }
+            className="mt-1.5 w-full py-1.5 px-2 rounded-lg text-[11px] font-semibold text-[#52645B] dark:text-[#9DB0A5] hover:bg-[#E6EDE8] dark:hover:bg-[#1E2E26] transition-colors text-center cursor-pointer"
+          >
+            {activeRole === 'teacher'
+              ? t('🏫 प्रधानाध्यापक व्यू में बदलें', '🏫 Switch to Headmaster View')
+              : t('🧑‍🏫 शिक्षक व्यू में वापस जाएं', '🧑‍🏫 Back to Teacher View')}
+          </button>
+        )}
       </div>
     </aside>
   );
@@ -346,6 +458,7 @@ export const WorkspaceTopbar: React.FC<HeaderProps> = ({
   onOpenSearch,
   onOpenSettings,
 }) => {
+  const { isEn, toggleLanguage, t } = useAppLanguage();
   const pageMeta = PAGE_TITLES[activePage] || PAGE_TITLES.dashboard;
 
   return (
@@ -354,29 +467,45 @@ export const WorkspaceTopbar: React.FC<HeaderProps> = ({
         <button
           className="hamburger workspace-hamburger"
           onClick={() => setIsDrawerOpen(true)}
-          aria-label="मेनू खोलें (Open menu)"
+          aria-label={t('मेनू खोलें', 'Open Menu')}
           type="button"
         >
           ☰
         </button>
         <div>
-          <h1 className="workspace-topbar-title">{pageMeta.title}</h1>
-          <p className="workspace-topbar-sub">{pageMeta.subtitle}</p>
+          <h1 className="workspace-topbar-title">
+            {isEn ? pageMeta.titleEn : pageMeta.title}
+          </h1>
+          <p className="workspace-topbar-sub">
+            {isEn ? pageMeta.subtitleEn : pageMeta.subtitle}
+          </p>
         </div>
       </div>
 
       <div className="header-actions">
+        {/* 1-Click Language Switcher Button (Always Visible!) */}
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          data-testid="global-lang-toggle-btn"
+          className="py-1.5 px-3 rounded-xl border-2 border-[#0D5B49] dark:border-[#3FBF9B] bg-[#DCEEE6]/70 dark:bg-[#173A2F] text-[#0D5B49] dark:text-[#3FBF9B] hover:bg-[#0D5B49] hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
+          title={t('Click to switch app to English', 'हिंदी भाषा में बदलने के लिए क्लिक करें')}
+          aria-label={isEn ? 'Switch to Hindi' : 'Switch to English'}
+        >
+          <span>🌐</span>
+          <span>{isEn ? 'हिंदी' : 'English'}</span>
+        </button>
+
         {onOpenSearch && (
           <button
             type="button"
             onClick={onOpenSearch}
             className="header-icon-btn header-search-btn"
-            title="खोजें (Ctrl+K)"
-            aria-label="खोजें (Search Ctrl+K)"
+            title={t('खोजें (Ctrl+K)', 'Search (Ctrl+K)')}
+            aria-label={t('खोजें (Search Ctrl+K)', 'Search (Ctrl+K)')}
           >
             <span>🔍</span>
-            <span className="header-search-label">खोजें</span>
-            <kbd className="header-kbd">⌘K</kbd>
+            <span className="header-search-label">{t('खोजें', 'Search')}</span>
           </button>
         )}
 
@@ -384,8 +513,8 @@ export const WorkspaceTopbar: React.FC<HeaderProps> = ({
           type="button"
           onClick={() => setActivePage('notifications')}
           className={`header-icon-btn ${activePage === 'notifications' ? 'active' : ''}`}
-          title="सूचना केंद्र (Notifications)"
-          aria-label={`सूचना केंद्र (${unreadCount} अपठित)`}
+          title={t('सूचना केंद्र (Notifications)', 'Notifications')}
+          aria-label={t(`सूचना केंद्र (${unreadCount} अपठित)`, `Notifications (${unreadCount} unread)`)}
         >
           <span>🔔</span>
           {unreadCount > 0 && <span className="header-badge-dot">{unreadCount}</span>}
@@ -396,8 +525,8 @@ export const WorkspaceTopbar: React.FC<HeaderProps> = ({
             type="button"
             onClick={() => onOpenSettings('general')}
             className="header-icon-btn"
-            title="सेटिंग्स व बैकअप"
-            aria-label="सेटिंग्स खोलें"
+            title={t('सेटिंग्स व भाषा', 'Settings & Language')}
+            aria-label={t('सेटिंग्स खोलें', 'Open Settings')}
           >
             ⚙️
           </button>
@@ -407,7 +536,7 @@ export const WorkspaceTopbar: React.FC<HeaderProps> = ({
           className="header-icon-btn"
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          title={theme === 'dark' ? 'लाइट मोड' : 'डार्क मोड'}
+          title={theme === 'dark' ? t('लाइट मोड', 'Light Mode') : t('डार्क मोड', 'Dark Mode')}
           type="button"
         >
           {theme === 'dark' ? '☀️' : '🌙'}
@@ -416,4 +545,3 @@ export const WorkspaceTopbar: React.FC<HeaderProps> = ({
     </header>
   );
 };
-

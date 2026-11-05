@@ -56,6 +56,7 @@ import { PinSecurityModal } from './PinSecurityModal';
 import { PWAInstallButton } from './PWAInstallButton';
 import { getStoredPinRecord } from '../utils/pinAndGoogleAuthManager';
 import { setStoredUser } from '../supabase';
+import { useAppLanguage } from '../utils/i18nManager';
 
 interface TeacherHubDashboardProps {
   onToast: (msg: string) => void;
@@ -238,6 +239,9 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
   const [activeFilterCategory, setActiveFilterCategory] = useState<TaskCategory | 'all'>('all');
   const [timelineDayOffset, setTimelineDayOffset] = useState<number | 'all'>('all');
   const [activeSectionTab, setActiveSectionTab] = useState<'today' | 'upcoming' | 'orders' | 'tools'>('today');
+  const [simpleTaskTitle, setSimpleTaskTitle] = useState('');
+  const [showAdvancedTools, setShowAdvancedTools] = useState(false);
+  const { isEn, toggleLanguage, t, tr } = useAppLanguage();
 
   // Safeguards Data & Modals
   const [duties, setDuties] = useState<Duty[]>(() => {
@@ -496,80 +500,79 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
     return days;
   }, [categoryFilteredTasks, meetings, trainings]);
 
+  const handleSimpleQuickAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = simpleTaskTitle.trim();
+    if (!trimmed) {
+      onToast(
+        t(
+          '⚠️ कृपया पहले अपना काम लिखें',
+          '⚠️ Please type your task first'
+        )
+      );
+      return;
+    }
+    const todayIso = new Date().toISOString().split('T')[0];
+    const newTask: Task = {
+      id: `task-simple-${Date.now()}`,
+      title: trimmed,
+      description: t('शिक्षक द्वारा जोड़ा गया आज का कार्य', 'Daily task added by teacher'),
+      status: 'not_started',
+      priority: 'high',
+      category: 'Academic',
+      type: 'general',
+      recurrence: 'none',
+      deadline: `${todayIso}T17:00:00.000Z`,
+      source: t('मेरी डायरी', 'My Diary'),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    saveTasks([newTask, ...tasks]);
+    setSimpleTaskTitle('');
+    setActiveSectionTab('today');
+    onToast(
+      t(
+        `✅ नया काम जुड़ गया: "${trimmed}"`,
+        `✅ New task added: "${trimmed}"`
+      )
+    );
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* ========================================================= */}
-      {/* 1. MINIMAL WORKSPACE HEADER                               */}
+      {/* 1. ULTRA-SIMPLE TEACHER LAUNCHER (ZERO APP KNOWLEDGE)     */}
       {/* ========================================================= */}
-      <div className="rounded-xl border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] p-4 sm:p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div
+        data-testid="simple-teacher-launcher"
+        className="rounded-2xl border-2 border-[#0D5B49]/30 dark:border-[#3FBF9B]/30 bg-white dark:bg-[#16231D] p-4 sm:p-6 shadow-sm space-y-5"
+      >
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#D3DDD6] dark:border-[#2B3C34]">
           <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#52645B] dark:text-[#9DB0A5]">
-              <span>{appSettings.schoolProfile.schoolName}</span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-[#0D5B49] dark:text-[#3FBF9B]">
+              <span>🏫 {tr(appSettings.schoolProfile.schoolName)}</span>
               <span aria-hidden="true">·</span>
               <span className="font-mono">UDISE+ {appSettings.schoolProfile.udiseCode}</span>
               <span aria-hidden="true">·</span>
-              <span>सत्र {appSettings.activeAcademicYear}</span>
+              <span>{t('सत्र', 'Session')} {appSettings.activeAcademicYear}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-[#13231C] dark:text-[#E7F0EA] tracking-tight m-0">
-              आज की कार्यसूची व विद्यालय प्रबंधन
+              {t(
+                '👇 आज आपको क्या काम करना है? किसी एक बड़े बटन को दबाएँ:',
+                '👇 What would you like to do today? Tap any big button below:'
+              )}
             </h2>
           </div>
 
-          {/* Primary Actions & Clean Utility Bar */}
+          {/* Essential Simple Top Buttons */}
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                setQuickAddTab('task');
-                setQuickAddOpen(true);
-              }}
-              className="py-2 px-4 rounded-lg bg-[#0D5B49] hover:bg-[#094537] text-white font-semibold text-xs sm:text-sm transition-colors flex items-center gap-1.5 min-h-[40px]"
+              onClick={toggleLanguage}
+              data-testid="dashboard-lang-toggle-btn"
+              className="py-2 px-3.5 rounded-xl border-2 border-[#0D5B49] dark:border-[#3FBF9B] bg-[#DCEEE6]/70 dark:bg-[#173A2F] text-[#0D5B49] dark:text-[#3FBF9B] hover:bg-[#0D5B49] hover:text-white font-bold text-xs sm:text-sm transition-colors min-h-[40px] cursor-pointer"
             >
-              <span>+ कार्य जोड़ें (Add Task)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsStartOfDayOpen(true)}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs sm:text-sm transition-colors min-h-[40px]"
-              title="दैनिक आरंभ चेकलिस्ट (Start of Day)"
-            >
-              सुबह की चेकलिस्ट
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsEndOfDayOpen(true)}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs sm:text-sm transition-colors min-h-[40px]"
-              title="शाम की कार्य समीक्षा (End of Day Review)"
-            >
-              शाम की समीक्षा
-            </button>
-
-            <button
-              id="open-demo-qa-modal-btn"
-              type="button"
-              onClick={() => {
-                setDemoQaTab('demo');
-                setIsDemoQaOpen(true);
-              }}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#E6EDE8] dark:hover:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs transition-colors min-h-[40px]"
-              aria-label="डेमो शिक्षक प्रोफ़ाइल एवं QA परीक्षण चेकलिस्ट खोलें"
-            >
-              डेमो प्रोफ़ाइल व QA परीक्षण
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setDemoQaTab('a11y');
-                setIsDemoQaOpen(true);
-              }}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#E6EDE8] dark:hover:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] font-medium text-xs transition-colors min-h-[40px]"
-              aria-label="बड़े फ़ॉन्ट और सुगम्यता नियंत्रण खोलें"
-            >
-              A+ फ़ॉन्ट व सुगम्यता
+              {isEn ? '🌐 हिंदी में बदलें (Hindi)' : '🌐 English में देखें'}
             </button>
 
             <button
@@ -579,10 +582,12 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 setPinSecurityMode('setup_pin');
                 setIsPinSecurityOpen(true);
               }}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34] text-[#0D5B49] dark:text-[#3FBF9B] font-semibold text-xs transition-colors min-h-[40px]"
-              aria-label="Google लॉगिन एवं 4-अंकीय पिन सेटअप खोलें"
+              className="py-2 px-3 rounded-xl border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34] text-[#0D5B49] dark:text-[#3FBF9B] font-semibold text-xs transition-colors min-h-[40px] cursor-pointer"
+              aria-label={t('Google लॉगिन एवं 4-अंकीय पिन सेटअप खोलें', 'Open Google Login & 4-Digit PIN Setup')}
             >
-              {hasPinConfigured ? '🔢 4-Digit PIN (सक्रिय)' : '🔐 Google व 4-Digit PIN'}
+              {hasPinConfigured
+                ? t('🔢 4-Digit PIN (सक्रिय)', '🔢 4-Digit PIN (Active)')
+                : t('🔐 Google व 4-Digit PIN', '🔐 Google & 4-Digit PIN')}
             </button>
 
             <PWAInstallButton variant="button" onToast={onToast} />
@@ -590,12 +595,204 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
             <button
               type="button"
               onClick={() => openSettingsWithTab('general')}
-              className="py-2 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#E6EDE8] dark:hover:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] font-medium text-xs transition-colors min-h-[40px]"
-              aria-label="ऐप सेटिंग्स खोलें"
+              className="py-2 px-3 rounded-xl border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] hover:bg-[#E6EDE8] dark:hover:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] font-semibold text-xs transition-colors min-h-[40px] cursor-pointer"
+              aria-label={t('ऐप सेटिंग्स खोलें', 'Open App Settings')}
             >
-              सेटिंग्स
+              ⚙️ {t('सेटिंग्स', 'Settings')}
             </button>
           </div>
+        </div>
+
+        {/* 6 Giant, Self-Explanatory Teacher Action Buttons */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <button
+            type="button"
+            onClick={() => onNavigate?.('classes')}
+            className="p-4 rounded-2xl border-2 border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/70 dark:bg-emerald-950/30 hover:border-[#0D5B49] dark:hover:border-[#3FBF9B] text-left flex flex-col justify-between gap-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <span className="text-3xl leading-none">🙋‍♂️</span>
+            <div>
+              <div className="font-bold text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA]">
+                {t('बच्चों की हाज़िरी', 'Attendance & Classes')}
+              </div>
+              <div className="text-xs text-[#52645B] dark:text-[#9DB0A5] mt-0.5">
+                {t('उपस्थिति व छात्र सूची', 'Mark daily attendance')}
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('sheets')}
+            className="p-4 rounded-2xl border-2 border-amber-200 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/30 hover:border-amber-600 text-left flex flex-col justify-between gap-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <span className="text-3xl leading-none">🍛</span>
+            <div>
+              <div className="font-bold text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA]">
+                {t('एमडीएम व रजिस्टर', 'MDM & Registers')}
+              </div>
+              <div className="text-xs text-[#52645B] dark:text-[#9DB0A5] mt-0.5">
+                {t('मध्याह्न भोजन व शीट्स', 'Fill MDM & school sheets')}
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('portals')}
+            className="p-4 rounded-2xl border-2 border-blue-200 dark:border-blue-800/80 bg-blue-50/70 dark:bg-blue-950/30 hover:border-blue-600 text-left flex flex-col justify-between gap-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <span className="text-3xl leading-none">🌐</span>
+            <div>
+              <div className="font-bold text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA]">
+                {t('सरकारी पोर्टल', 'Govt Portals')}
+              </div>
+              <div className="text-xs text-[#52645B] dark:text-[#9DB0A5] mt-0.5">
+                {t('प्रेरणा, मानव संपदा, UDISE+', 'Prerna, eHRMS, UDISE+')}
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('govt_orders')}
+            className="p-4 rounded-2xl border-2 border-purple-200 dark:border-purple-800/80 bg-purple-50/70 dark:bg-purple-950/30 hover:border-purple-600 text-left flex flex-col justify-between gap-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <span className="text-3xl leading-none">📜</span>
+            <div>
+              <div className="font-bold text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA]">
+                {t('सरकारी आदेश', 'Govt Orders')}
+              </div>
+              <div className="text-xs text-[#52645B] dark:text-[#9DB0A5] mt-0.5">
+                {t(`${unreadGovtOrdersCount} नए शासनादेश पढ़ें`, `${unreadGovtOrdersCount} new orders to read`)}
+              </div>
+            </div>
+          </button>
+
+          <button
+            id="open-printable-summary-pdf-btn"
+            type="button"
+            onClick={handlePrintPendingReport}
+            className="p-4 rounded-2xl border-2 border-teal-200 dark:border-teal-800/80 bg-teal-50/70 dark:bg-teal-950/30 hover:border-[#0D5B49] text-left flex flex-col justify-between gap-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <span className="text-3xl leading-none">📄</span>
+            <div>
+              <div className="font-bold text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA]">
+                {t('पीडीएफ रिपोर्ट', 'PDF Report')}
+              </div>
+              <div className="text-xs text-[#52645B] dark:text-[#9DB0A5] mt-0.5">
+                {t('1-क्लिक में प्रिंट निकालें', '1-Click printable summary')}
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('trainings')}
+            className="p-4 rounded-2xl border-2 border-rose-200 dark:border-rose-800/80 bg-rose-50/70 dark:bg-rose-950/30 hover:border-rose-600 text-left flex flex-col justify-between gap-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <span className="text-3xl leading-none">🎓</span>
+            <div>
+              <div className="font-bold text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA]">
+                {t('ट्रेनिंग व ड्यूटी', 'Trainings & Duties')}
+              </div>
+              <div className="text-xs text-[#52645B] dark:text-[#9DB0A5] mt-0.5">
+                {t('दीक्षा कोर्स व मीटिंग', 'DIKSHA & school meetings')}
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* 1-Box Super Simple Task Adder */}
+        <form
+          onSubmit={handleSimpleQuickAddTask}
+          className="p-3 sm:p-4 rounded-2xl bg-[#F1F5F2] dark:bg-[#0F1814] border border-[#D3DDD6] dark:border-[#2B3C34] flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5"
+        >
+          <div className="flex-1 flex items-center gap-2 bg-white dark:bg-[#16231D] rounded-xl px-3.5 py-2.5 border border-[#D3DDD6] dark:border-[#2B3C34]">
+            <span className="text-lg" aria-hidden="true">✍️</span>
+            <input
+              type="text"
+              value={simpleTaskTitle}
+              onChange={(e) => setSimpleTaskTitle(e.target.value)}
+              data-testid="simple-task-input"
+              placeholder={t(
+                'यहाँ अपना नया काम लिखें... (जैसे: दोपहर 12 बजे MDM रिपोर्ट भेजनी है)',
+                'Write your new task here... (e.g., Send MDM report at 12 PM)'
+              )}
+              className="w-full bg-transparent text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA] focus:outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="submit"
+              data-testid="simple-task-submit-btn"
+              className="flex-1 sm:flex-initial py-2.5 px-5 rounded-xl bg-[#0D5B49] hover:bg-[#094537] text-white font-bold text-sm transition-colors cursor-pointer"
+            >
+              {t('➕ काम जोड़ें (Add)', '➕ Add Task')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setQuickAddTab('task');
+                setQuickAddOpen(true);
+              }}
+              className="py-2.5 px-3 rounded-xl border border-[#D3DDD6] dark:border-[#2B3C34] bg-white dark:bg-[#16231D] text-xs font-semibold text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] cursor-pointer"
+              title={t('विस्तृत फॉर्म खोलें', 'Open Detailed Form')}
+            >
+              {t('विस्तृत फॉर्म', 'More Options')}
+            </button>
+          </div>
+        </form>
+
+        {/* Secondary Utility Row (Morning/Evening Checklists, Font Size, Demo) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsStartOfDayOpen(true)}
+              className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] font-medium cursor-pointer"
+            >
+              ☀️ {t('सुबह की चेकलिस्ट', 'Morning Checklist')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsEndOfDayOpen(true)}
+              className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] font-medium cursor-pointer"
+            >
+              🌙 {t('शाम की समीक्षा', 'Evening Review')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDemoQaTab('a11y');
+                setIsDemoQaOpen(true);
+              }}
+              className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] text-[#13231C] dark:text-[#E7F0EA] font-medium cursor-pointer"
+            >
+              🔍 {t('A+ बड़ा फ़ॉन्ट', 'A+ Large Font')}
+            </button>
+            <button
+              id="open-demo-qa-modal-btn"
+              type="button"
+              onClick={() => {
+                setDemoQaTab('demo');
+                setIsDemoQaOpen(true);
+              }}
+              className="py-1.5 px-3 rounded-lg border border-[#D3DDD6] dark:border-[#2B3C34] bg-[#F8FAF9] dark:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] font-medium cursor-pointer"
+            >
+              🧪 {t('डेमो व सहायता', 'Demo & Help')}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAdvancedTools((prev) => !prev)}
+            className="text-[#0D5B49] dark:text-[#3FBF9B] font-bold hover:underline cursor-pointer"
+          >
+            {showAdvancedTools
+              ? t('▲ ग्राफ छुपाएं (Hide Analytics)', '▲ Hide Analytics Chart')
+              : t('📊 30-दिन का ग्राफ दिखाएं (Show 30-Day Chart)', '📊 Show 30-Day Analytics Chart')}
+          </button>
         </div>
       </div>
 
@@ -704,14 +901,16 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
       {/* ========================================================= */}
       {/* 2B. RECHARTS 30-DAY TASK COMPLETION BY CATEGORY WIDGET    */}
       {/* ========================================================= */}
-      <TaskCompletionChartWidget
-        tasks={tasks}
-        activeFilterCategory={activeFilterCategory}
-        onSelectCategory={(cat) => {
-          setActiveFilterCategory(cat);
-          setActiveSectionTab('today');
-        }}
-      />
+      {showAdvancedTools && (
+        <TaskCompletionChartWidget
+          tasks={tasks}
+          activeFilterCategory={activeFilterCategory}
+          onSelectCategory={(cat) => {
+            setActiveFilterCategory(cat);
+            setActiveSectionTab('today');
+          }}
+        />
+      )}
 
       {/* ========================================================= */}
       {/* 3. FOCUSED VIEW TABS (AVOIDS VISUAL OVERLOAD)             */}
@@ -727,7 +926,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
-            आज व लंबित कार्य ({todayTasks.length + overdueTasks.length})
+            {t('आज व लंबित कार्य', "Today's & Pending Tasks")} ({todayTasks.length + overdueTasks.length})
           </button>
 
           <button
@@ -739,7 +938,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
-            आगामी 7 दिन (7-Day Plan)
+            {t('आगामी 7 दिन', 'Upcoming 7 Days')}
           </button>
 
           <button
@@ -751,7 +950,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
-            शासनादेश ({unreadGovtOrdersCount} अपठित)
+            {t(`शासनादेश (${unreadGovtOrdersCount} अपठित)`, `Govt Orders (${unreadGovtOrdersCount} Unread)`)}
           </button>
 
           <button
@@ -763,7 +962,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 : 'text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA]'
             }`}
           >
-            समीक्षा, बैकअप व रिपोर्ट
+            {t('समीक्षा, बैकअप व रिपोर्ट', 'Review, Backup & Reports')}
           </button>
         </div>
 
@@ -777,23 +976,22 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
               }}
               className="text-[#0D5B49] dark:text-[#00F5D4] font-semibold hover:underline"
             >
-              फिल्टर हटाएं (Show All) ✕
+              {t('फिल्टर हटाएं ✕', 'Clear Filter ✕')}
             </button>
           )}
           <button
-            id="open-printable-summary-pdf-btn"
             type="button"
             onClick={handlePrintPendingReport}
             className="text-[#0D5B49] dark:text-[#00F5D4] hover:text-[#13231C] dark:hover:text-white font-semibold"
           >
-            📄 पीडीएफ रिपोर्ट (Tasks &amp; Classes PDF)
+            {t('📄 पीडीएफ रिपोर्ट', '📄 PDF Report')}
           </button>
           <button
             type="button"
             onClick={handleResetSampleData}
             className="text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-white font-medium"
           >
-            रीसेट (Reset)
+            {t('रीसेट', 'Reset')}
           </button>
         </div>
       </div>
@@ -805,10 +1003,10 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
         <div
           className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-white dark:bg-[#16231D] border border-[#D3DDD6] dark:border-[#2B3C34]"
           role="region"
-          aria-label="कार्य श्रेणी फिल्टर (Task Category Filter)"
+          aria-label="Task Category Filter"
         >
           <span className="text-xs font-semibold text-[#52645B] dark:text-[#9DB0A5]">
-            श्रेणी अनुसार छाँटें (Filter by Category):
+            {t('श्रेणी अनुसार छाँटें:', 'Filter by Category:')}
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
             <button
@@ -820,7 +1018,7 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                   : 'bg-[#F1F5F2] dark:bg-[#1E2E26] text-[#52645B] dark:text-[#9DB0A5] hover:text-[#13231C] dark:hover:text-[#E7F0EA] hover:bg-[#E6EDE8] dark:hover:bg-[#2B3C34]'
               }`}
             >
-              सभी श्रेणियाँ (All · {categoryCounts.all})
+              {t(`सभी श्रेणियाँ (${categoryCounts.all})`, `All Categories (${categoryCounts.all})`)}
             </button>
 
             {(['Administrative', 'Academic', 'Extra-curricular'] as TaskCategory[]).map((cat) => {
@@ -839,7 +1037,9 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                 >
                   <span aria-hidden="true">{meta.icon}</span>
                   <span>
-                    {meta.labelHi} ({meta.labelEn} · {categoryCounts[cat]})
+                    {isEn
+                      ? `${meta.labelEn} (${categoryCounts[cat]})`
+                      : `${meta.labelHi} (${categoryCounts[cat]})`}
                   </span>
                 </button>
               );
@@ -918,12 +1118,12 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                         </div>
 
                         <h4 className="font-semibold text-sm sm:text-base text-[#13231C] dark:text-[#E7F0EA]">
-                          {task.title}
+                          {tr(task.title)}
                         </h4>
 
                         {task.description && (
                           <p className="text-xs text-[#52645B] dark:text-[#9DB0A5] line-clamp-1">
-                            {task.description}
+                            {tr(task.description)}
                           </p>
                         )}
                       </div>
@@ -1105,12 +1305,12 @@ export const TeacherHubDashboard: React.FC<TeacherHubDashboardProps> = ({
                               : 'text-[#13231C] dark:text-[#E7F0EA]'
                           }`}
                         >
-                          {task.title}
+                          {tr(task.title)}
                         </h4>
 
                         {task.description && (
                           <p className="text-xs text-[#52645B] dark:text-[#9DB0A5] line-clamp-1">
-                            {task.description}
+                            {tr(task.description)}
                           </p>
                         )}
                       </div>

@@ -58,6 +58,7 @@ import {
 import { OfflineIndicator } from './components/PWAInstallButton';
 import { SupabaseKeepAliveManager } from './components/SupabaseKeepAliveManager';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { useAppLanguage, localizeDomTree } from './utils/i18nManager';
 
 export const App: React.FC = () => {
   // Theme management — applies synchronously to <html> and <body> so all dynamic Tailwind dark:* and CSS token elements update immediately
@@ -127,11 +128,14 @@ export const App: React.FC = () => {
   // Reminders Service Layer (runs on app load + every 15 minutes)
   const reminderService = useReminderService(showToast);
 
-  // Page Routing
+  const { lang } = useAppLanguage();
+
+  // Page Routing — Default directly to 'dashboard' so teachers with 0 app knowledge can start working immediately!
   const [activePage, setActivePage] = useState<
     'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'keepalive' | 'login'
   >(() => {
     const hash = window.location.hash.toLowerCase();
+    if (hash.includes('home')) return 'home';
     if (hash.includes('keepalive') || hash.includes('supabase') || hash.includes('cron')) return 'keepalive';
     if (hash.includes('dashboard')) return 'dashboard';
     if (hash.includes('safeguard') || hash.includes('review') || hash.includes('summary')) return 'safeguards';
@@ -145,14 +149,15 @@ export const App: React.FC = () => {
     if (hash.includes('meet')) return 'meetings';
     if (hash.includes('sheets')) return 'sheets';
     if (hash.includes('login')) return 'login';
-    return 'home';
+    return 'dashboard';
   });
 
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
-      if (hash.includes('keepalive') || hash.includes('supabase') || hash.includes('cron')) setActivePage('keepalive');
-      else if (hash.includes('dashboard')) setActivePage('dashboard');
+      if (hash.includes('home')) setActivePage('home');
+      else if (hash.includes('keepalive') || hash.includes('supabase') || hash.includes('cron')) setActivePage('keepalive');
+      else if (hash.includes('dashboard') || hash === '' || hash === '#') setActivePage('dashboard');
       else if (hash.includes('safeguard') || hash.includes('review') || hash.includes('summary')) setActivePage('safeguards');
       else if (hash.includes('rollover') || hash.includes('session')) setActivePage('rollover');
       else if (hash.includes('class')) setActivePage('classes');
@@ -164,12 +169,39 @@ export const App: React.FC = () => {
       else if (hash.includes('meet')) setActivePage('meetings');
       else if (hash.includes('sheets')) setActivePage('sheets');
       else if (hash.includes('login')) setActivePage('login');
-      else if (hash.includes('home') || hash === '') setActivePage('home');
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Automatically localize DOM text nodes across all sub-modules & modals when language switches between 'en' and 'hi'
+  useEffect(() => {
+    const rootEl = document.getElementById('root');
+    if (!rootEl) return;
+
+    let rafId: number | null = null;
+    const runLocalization = () => {
+      localizeDomTree(rootEl, lang);
+    };
+
+    runLocalization();
+
+    const observer = new MutationObserver(() => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(runLocalization);
+    });
+
+    observer.observe(rootEl, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [lang, activePage]);
 
   const navigateTo = (
     page: 'home' | 'dashboard' | 'portals' | 'govt_orders' | 'meetings' | 'sheets' | 'trainings' | 'duties' | 'notifications' | 'classes' | 'rollover' | 'safeguards' | 'keepalive' | 'login'
@@ -177,7 +209,7 @@ export const App: React.FC = () => {
     setActivePage(page);
     window.location.hash =
       page === 'home'
-        ? ''
+        ? 'home'
         : page === 'keepalive'
         ? 'keepalive'
         : page === 'safeguards'
